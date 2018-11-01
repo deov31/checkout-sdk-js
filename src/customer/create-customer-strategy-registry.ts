@@ -7,9 +7,16 @@ import { Registry } from '../common/registry';
 import { ConfigActionCreator, ConfigRequestSender } from '../config';
 import { PaymentMethodActionCreator, PaymentMethodRequestSender } from '../payment';
 import { AmazonPayScriptLoader } from '../payment/strategies/amazon-pay';
-import { createBraintreeVisaCheckoutPaymentProcessor, VisaCheckoutScriptLoader } from '../payment/strategies/braintree';
+import {
+    createBraintreeVisaCheckoutPaymentProcessor,
+    BraintreeScriptLoader,
+    BraintreeSDKCreator,
+    VisaCheckoutScriptLoader
+} from '../payment/strategies/braintree';
 import { ChasePayScriptLoader } from '../payment/strategies/chasepay';
-import { createGooglePayBraintreePaymentProcessor, createGooglePayStripePaymentProcessor } from '../payment/strategies/googlepay/';
+import { createGooglePayPaymentProcessor } from '../payment/strategies/googlepay';
+import GooglePayBraintreeInitializer from '../payment/strategies/googlepay/googlepay-braintree-initializer';
+import GooglePayStripeInitializer from '../payment/strategies/googlepay/googlepay-stripe-initializer';
 import { MasterpassScriptLoader } from '../payment/strategies/masterpass';
 import { RemoteCheckoutActionCreator, RemoteCheckoutRequestSender } from '../remote-checkout';
 
@@ -97,7 +104,14 @@ export default function createCustomerStrategyRegistry(
         new GooglePayBraintreeCustomerStrategy(
             store,
             remoteCheckoutActionCreator,
-            createGooglePayBraintreePaymentProcessor(store),
+            createGooglePayPaymentProcessor(
+                store,
+                new GooglePayBraintreeInitializer(
+                    new BraintreeSDKCreator(
+                        new BraintreeScriptLoader(scriptLoader)
+                    )
+                )
+            ),
             formPoster
         )
     );
@@ -106,7 +120,10 @@ export default function createCustomerStrategyRegistry(
         new GooglePayStripeCustomerStrategy(
             store,
             remoteCheckoutActionCreator,
-            createGooglePayStripePaymentProcessor(store),
+            createGooglePayPaymentProcessor(
+                store,
+                new GooglePayStripeInitializer()
+            ),
             formPoster
     )
 );

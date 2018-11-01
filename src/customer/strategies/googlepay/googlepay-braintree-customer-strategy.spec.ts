@@ -1,5 +1,6 @@
 import { createFormPoster, FormPoster } from '@bigcommerce/form-poster/';
 import { createRequestSender, RequestSender } from '@bigcommerce/request-sender';
+import { createScriptLoader } from '@bigcommerce/script-loader';
 
 import { getCartState } from '../../../cart/carts.mock';
 import { createCheckoutStore, CheckoutStore } from '../../../checkout';
@@ -8,7 +9,8 @@ import { InvalidArgumentError, MissingDataError } from '../../../common/error/er
 import { getConfigState } from '../../../config/configs.mock';
 import PaymentMethod from '../../../payment/payment-method';
 import { getPaymentMethod, getPaymentMethodsState } from '../../../payment/payment-methods.mock';
-import { createGooglePayBraintreePaymentProcessor, GooglePayPaymentProcessor } from '../../../payment/strategies/googlepay';
+import { BraintreeScriptLoader, BraintreeSDKCreator } from '../../../payment/strategies/braintree';
+import { createGooglePayPaymentProcessor, GooglePayBraintreeInitializer, GooglePayPaymentProcessor } from '../../../payment/strategies/googlepay';
 import { getGooglePaymentDataMock } from '../../../payment/strategies/googlepay/googlepay.mock';
 import { RemoteCheckoutActionCreator, RemoteCheckoutRequestSender } from '../../../remote-checkout';
 import { CustomerInitializeOptions } from '../../customer-request-options';
@@ -46,7 +48,14 @@ describe('GooglePayBraintreeCustomerStrategy', () => {
             new RemoteCheckoutRequestSender(requestSender)
         );
 
-        paymentProcessor = createGooglePayBraintreePaymentProcessor(store);
+        paymentProcessor = createGooglePayPaymentProcessor(
+            store,
+            new GooglePayBraintreeInitializer(
+                new BraintreeSDKCreator(
+                    new BraintreeScriptLoader(createScriptLoader())
+                )
+            )
+        );
 
         formPoster = createFormPoster();
 

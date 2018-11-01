@@ -11,7 +11,7 @@ import {
 } from './googlepay.mock';
 
 describe('GooglePayStripeInitializer', () => {
-    it('creates an instance of GooglePayBraintreeInitializer', () => {
+    it('creates an instance of GooglePayStripeInitializer', () => {
         const googlePayStripeInitializer = new GooglePayStripeInitializer();
 
         expect(googlePayStripeInitializer).toBeInstanceOf(GooglePayStripeInitializer);
@@ -24,7 +24,7 @@ describe('GooglePayStripeInitializer', () => {
             googlePayStripeInitializer = new GooglePayStripeInitializer();
         });
 
-        it('initializes the google pay configuration for braintree', async () => {
+        it('initializes the google pay configuration for stripe', async () => {
             const googlePayPaymentDataRequestV2 = await googlePayStripeInitializer.initialize(
                 getCheckoutMock(),
                 getPaymentMethodMock(),

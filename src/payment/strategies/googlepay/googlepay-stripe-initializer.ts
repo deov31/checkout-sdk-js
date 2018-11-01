@@ -15,11 +15,11 @@ export default class GooglePayStripeInitializer implements GooglePayInitializer 
         paymentMethod: PaymentMethod,
         hasShippingAddress: boolean
     ): Promise<GooglePayPaymentDataRequestV2> {
-        return this._mapGooglePayStripeDataRequestToGooglePayDataRequestV2(
+        return Promise.resolve(this._mapGooglePayStripeDataRequestToGooglePayDataRequestV2(
             checkout,
             paymentMethod.initializationData,
             hasShippingAddress
-        );
+        ));
     }
 
     teardown(): Promise<void> {
@@ -47,8 +47,8 @@ export default class GooglePayStripeInitializer implements GooglePayInitializer 
         checkout: Checkout,
         initializationData: any,
         hasShippingAddress: boolean
-    ): Promise<GooglePayPaymentDataRequestV2> {
-        const googlePayPaymentDataRequestV2: GooglePayPaymentDataRequestV2 = {
+    ): GooglePayPaymentDataRequestV2 {
+        return {
             apiVersion: 2,
             apiVersionMinor: 0,
             merchantInfo: {
@@ -87,6 +87,5 @@ export default class GooglePayStripeInitializer implements GooglePayInitializer 
                 phoneNumberRequired: true,
             },
         };
-        return Promise.resolve(googlePayPaymentDataRequestV2);
     }
 }

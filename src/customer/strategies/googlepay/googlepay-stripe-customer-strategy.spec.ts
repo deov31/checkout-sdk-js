@@ -8,7 +8,7 @@ import { InvalidArgumentError, MissingDataError } from '../../../common/error/er
 import { getConfigState } from '../../../config/configs.mock';
 import PaymentMethod from '../../../payment/payment-method';
 import { getPaymentMethod, getPaymentMethodsState } from '../../../payment/payment-methods.mock';
-import { createGooglePayStripePaymentProcessor, GooglePayPaymentProcessor } from '../../../payment/strategies/googlepay';
+import { createGooglePayPaymentProcessor, GooglePayPaymentProcessor, GooglePayStripeInitializer} from '../../../payment/strategies/googlepay';
 import { getGooglePaymentDataMock } from '../../../payment/strategies/googlepay/googlepay.mock';
 import { RemoteCheckoutActionCreator, RemoteCheckoutRequestSender } from '../../../remote-checkout';
 import { CustomerInitializeOptions } from '../../customer-request-options';
@@ -46,7 +46,10 @@ describe('GooglePayStripeCustomerStrategy', () => {
             new RemoteCheckoutRequestSender(requestSender)
         );
 
-        paymentProcessor = createGooglePayStripePaymentProcessor(store);
+        paymentProcessor = createGooglePayPaymentProcessor(
+            store,
+            new GooglePayStripeInitializer()
+        );
 
         formPoster = createFormPoster();
 

@@ -15,7 +15,8 @@ import {
     GooglePaymentData,
     GooglePayAddress,
     GooglePayPaymentDataRequestV2,
-    GooglePaySDK, TokenizePayload,
+    GooglePaySDK,
+    TokenizePayload,
 } from './googlepay';
 import { GooglePayBraintreePaymentDataRequestV1 } from './googlepay-braintree';
 
