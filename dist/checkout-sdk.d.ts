@@ -381,7 +381,12 @@ declare interface CheckoutButtonInitializeOptions extends CheckoutButtonOptions 
      * The options that are required to facilitate Braintree GooglePay. They can be
      * omitted unles you need to support Braintree GooglePay.
      */
-    googlepaybraintree?: GooglePayBraintreeButtonInitializeOptions;
+    googlepaybraintree?: GooglePayButtonInitializeOptions;
+    /**
+     * The options that are required to facilitate Stripe GooglePay. They can be
+     * omitted unles you need to support Stripe GooglePay.
+     */
+    googlepaystripe?: GooglePayButtonInitializeOptions;
 }
 
 declare class CheckoutButtonInitializer {
@@ -477,6 +482,7 @@ declare enum CheckoutButtonMethodType {
     BRAINTREE_PAYPAL = "braintreepaypal",
     BRAINTREE_PAYPAL_CREDIT = "braintreepaypalcredit",
     GOOGLEPAY_BRAINTREE = "googlepaybraintree",
+    GOOGLEPAY_STRIPE = "googlepaystripe",
     MASTERPASS = "masterpass"
 }
 
@@ -2495,7 +2501,7 @@ declare interface GiftCertificateOrderPayment extends OrderPayment {
     };
 }
 
-declare interface GooglePayBraintreeButtonInitializeOptions {
+declare interface GooglePayButtonInitializeOptions {
     /**
      * The color of the GooglePay button that will be inserted.
      *  black (default): a black button suitable for use on white or light backgrounds.
