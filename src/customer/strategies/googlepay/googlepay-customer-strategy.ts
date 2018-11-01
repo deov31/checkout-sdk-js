@@ -9,7 +9,7 @@ import CustomerCredentials from '../../customer-credentials';
 import { CustomerInitializeOptions, CustomerRequestOptions } from '../../customer-request-options';
 import CustomerStrategy from '../customer-strategy';
 
-export default class GooglePayBraintreeCustomerStrategy extends CustomerStrategy {
+export default class GooglePayCustomerStrategy extends CustomerStrategy {
     private _walletButton?: HTMLElement;
 
     constructor(
@@ -26,15 +26,21 @@ export default class GooglePayBraintreeCustomerStrategy extends CustomerStrategy
             return super.initialize(options);
         }
 
-        const { googlepaybraintree, methodId }  = options;
+        const { methodId }  = options;
 
-        if (!googlepaybraintree || !methodId) {
+        const googlePayOptions = (
+            options.methodId === 'googlepaybraintree' ? options.googlepaybraintree :
+            options.methodId === 'googlepaystripe' ? options.googlepaystripe :
+            undefined
+        );
+
+        if (!googlePayOptions || !methodId) {
             throw new MissingDataError(MissingDataErrorType.MissingPaymentMethod);
         }
 
         return this._googlePayPaymentProcessor.initialize(methodId)
             .then(() => {
-                this._walletButton = this._createSignInButton(googlepaybraintree.container);
+                this._walletButton = this._createSignInButton(googlePayOptions.container);
             })
             .then(() => super.initialize(options));
     }

@@ -29,11 +29,10 @@ import {
     ChasePayCustomerStrategy,
     CustomerStrategy,
     DefaultCustomerStrategy,
-    GooglePayBraintreeCustomerStrategy,
+    GooglePayCustomerStrategy,
     MasterpassCustomerStrategy,
     SquareCustomerStrategy
 } from './strategies';
-import { GooglePayStripeCustomerStrategy } from './strategies/googlepay';
 
 export default function createCustomerStrategyRegistry(
     store: CheckoutStore,
@@ -101,7 +100,7 @@ export default function createCustomerStrategyRegistry(
     );
 
     registry.register('googlepaybraintree', () =>
-        new GooglePayBraintreeCustomerStrategy(
+        new GooglePayCustomerStrategy(
             store,
             remoteCheckoutActionCreator,
             createGooglePayPaymentProcessor(
@@ -117,7 +116,7 @@ export default function createCustomerStrategyRegistry(
     );
 
     registry.register('googlepaystripe', () =>
-        new GooglePayStripeCustomerStrategy(
+        new GooglePayCustomerStrategy(
             store,
             remoteCheckoutActionCreator,
             createGooglePayPaymentProcessor(
