@@ -196,6 +196,28 @@ describe('KlarnaPaymentStrategy', () => {
                 .toHaveBeenCalledWith(getKlarnaUpdateSessionParams(), expect.any(Function));
         });
 
+        it('throws error if required data is not loaded', async () => {
+            store = store = createCheckoutStore({
+                ...getCheckoutStoreState(),
+                billingAddress: undefined,
+            });
+            strategy = new KlarnaPaymentStrategy(
+                store,
+                orderActionCreator,
+                paymentMethodActionCreator,
+                remoteCheckoutActionCreator,
+                scriptLoader
+            );
+
+            strategy.initialize({ methodId: paymentMethod.id, klarna: { container: '#container' } });
+
+            try {
+                await strategy.execute(payload);
+            } catch (error) {
+                expect(error).toBeInstanceOf(MissingDataError);
+            }
+        });
+
         it('submits authorization token', async () => {
             await strategy.execute(payload);
 
