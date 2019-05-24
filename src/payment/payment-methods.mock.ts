@@ -119,6 +119,7 @@ export function getAuthorizenet(): PaymentMethod {
         supportedCards: [],
         config: {
             displayName: 'Authorizenet',
+            is3dsEnabled: true,
             testMode: false,
         },
         type: 'PAYMENT_TYPE_API',
@@ -133,9 +134,11 @@ export function getCybersource(): PaymentMethod {
         supportedCards: [],
         config: {
             displayName: 'Cybersource',
+            is3dsEnabled: true,
             testMode: false,
         },
         type: 'PAYMENT_TYPE_API',
+        clientToken: 'cyberToken',
     };
 }
 

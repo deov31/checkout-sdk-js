@@ -1,3 +1,5 @@
+import {ChasePay} from "../chasepay/chasepay";
+
 export const SignatureValidationErrors = [100004, 1010, 1011, 1020];
 
 export interface CyberSourceCardinal {
@@ -144,4 +146,8 @@ export interface CardinalEventResponse {
     jwt?: string;
     data?: CardinalValidatedData;
     status: boolean;
+}
+
+export interface JPMC {
+    CyberSourceCardinal: CyberSourceCardinal;
 }
