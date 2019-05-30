@@ -12,6 +12,8 @@ import {
     CardinalWindow,
     CyberSourceCardinal,
     PaymentType,
+    SetupCompletedData,
+    ModuleState,
 } from './cybersource';
 
 const CardinalWindowMock: CardinalWindow = window;
@@ -89,5 +91,12 @@ export function getRejectAuthorizationPromise(): CardinalEventResponse {
             },
         },
         status: true,
+    };
+}
+
+export function getModuleState(): ModuleState {
+    return {
+        loaded: true,
+        module: 'cybersource',
     };
 }
