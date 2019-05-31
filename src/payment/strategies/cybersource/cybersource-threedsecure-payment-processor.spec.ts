@@ -14,11 +14,17 @@ import PaymentActionCreator from '../../payment-action-creator';
 import PaymentMethod from '../../payment-method';
 import { getCybersource, getPaymentMethodsState } from '../../payment-methods.mock';
 
-import {CardinalValidatedAction, CardinalValidatedData, CyberSourceCardinal, Payment} from './cybersource';
+import {CardinalValidatedAction, CardinalValidatedData, CyberSourceCardinal, Payment, CardinalBinProccessResponse, CardinalTriggerEvents} from './cybersource';
 import CyberSourceScriptLoader from './cybersource-script-loader';
 import CyberSourceThreeDSecurePaymentProcessor from './cybersource-threedsecure-payment-processor';
-import {getCardinalValidatedDataWithSetupError, getCybersourceCardinal} from './cybersource.mock';
+import {getCardinalValidatedDataWithSetupError, getCybersourceCardinal, getCybersourcePaymentData, getCardinalValidatedDataWithSetupSuccess, getCardinalBinProccessResponse} from './cybersource.mock';
 import { CardinalEventType } from './index';
+import { getOrderRequestBody } from '../../../order/internal-orders.mock';
+import { getCreditCardInstrument } from '../../payments.mock';
+import { NotInitializedError, RequestError } from '../../../common/error/errors';
+import { InternalErrorResponseBody } from '../../../common/error';
+import { getErrorResponse } from '../../../common/http-request/responses.mock';
+import mapFromInternalErrorResponse from '../../../common/error/errors/map-from-internal-error-response';
 
 describe('CyberSourceThreeDSecurePaymentProcessor', () => {
     let processor: CyberSourceThreeDSecurePaymentProcessor;
@@ -29,6 +35,7 @@ describe('CyberSourceThreeDSecurePaymentProcessor', () => {
     let paymentMethodMock: PaymentMethod;
     let _orderRequestSender: OrderRequestSender;
     let cardinal: CyberSourceCardinal;
+    let result: CardinalBinProccessResponse;
 
     beforeEach(() => {
         store = createCheckoutStore({
@@ -123,6 +130,96 @@ describe('CyberSourceThreeDSecurePaymentProcessor', () => {
 
             expect(() => processor.initialize(paymentMethod))
                 .toThrow(MissingDataError);
+        });
+    });
+
+    describe('#execute', () => {
+        beforeEach(() => {
+            paymentMethodMock = getCybersource();
+            cardinal = getCybersourceCardinal();
+
+            let call: () => {};
+
+            cardinal.on = jest.fn((type, callback) => {
+                if (type.toString() === CardinalEventType.SetupCompleted) {
+                    call = callback;
+                } else {
+                    jest.fn();
+                }
+            });
+            cardinal.trigger = jest.fn(() => Promise.resolve(getCardinalBinProccessResponse()));
+
+            jest.spyOn(cybersourceScriptLoader, 'load')
+                .mockReturnValue(Promise.resolve(cardinal));
+
+            jest.spyOn(cardinal, 'setup').mockImplementation(() => {
+                call();
+            });
+        });
+
+        it('executes successfully', async () => {
+            await processor.initialize(paymentMethodMock);
+
+            jest.spyOn(store, 'dispatch').mockReturnValue(Promise.resolve(store.getState()));
+            jest.spyOn(_orderActionCreator, 'submitOrder').mockReturnValue(Promise.resolve());
+            jest.spyOn(_paymentActionCreator, 'submitPayment').mockReturnValue(Promise.resolve());
+
+            const response = await processor.execute(getCybersourcePaymentData(), getOrderRequestBody(), getCreditCardInstrument());
+
+            expect(cardinal.trigger).toHaveBeenCalled();
+            expect(_orderActionCreator.submitOrder).toHaveBeenCalled();
+            expect(_paymentActionCreator.submitPayment).toHaveBeenCalled();
+            expect(response).toBe(store.getState());
+        });
+
+        it('throws when cardinal is not initialized', async () => {
+            const promise = processor.execute(getCybersourcePaymentData(), getOrderRequestBody(), getCreditCardInstrument());
+
+            return expect(promise).rejects.toThrow(NotInitializedError);
+        });
+
+        it('throws an error when cardinal.trigger failure', async () => {
+            cardinal.trigger = jest.fn(() => Promise.resolve(undefined));
+
+            await processor.initialize(paymentMethodMock);
+            const promise = processor.execute(getCybersourcePaymentData(), getOrderRequestBody(), getCreditCardInstrument());
+
+            return expect(promise).rejects.toThrow(NotInitializedError);
+        });
+
+        it('rejects an error when submitOrder failure', async () => {
+            await processor.initialize(paymentMethodMock);
+
+            jest.spyOn(store, 'dispatch').mockReturnValue(Promise.reject('error'));
+            jest.spyOn(_orderActionCreator, 'submitOrder').mockReturnValue(Promise.resolve());
+            jest.spyOn(_paymentActionCreator, 'submitPayment').mockReturnValue(Promise.resolve());
+
+            const promise = processor.execute(getCybersourcePaymentData(), getOrderRequestBody(), getCreditCardInstrument());
+
+            return expect(promise).rejects.toBe('error');
+        });
+
+        it('rejects an error when submitOrder failure with code enrolled_card', async () => {
+            await processor.initialize(paymentMethodMock);
+
+            let error: RequestError<InternalErrorResponseBody>;
+
+            const response = getErrorResponse({
+                status: 400,
+                title: 'Error with payment provider',
+                type: 'invalid_payment',
+                errors: [ 'enrolled_card' ],
+            });
+    
+            error = mapFromInternalErrorResponse(response);
+
+            jest.spyOn(store, 'dispatch').mockReturnValue(Promise.reject(error));
+            jest.spyOn(_orderActionCreator, 'submitOrder').mockReturnValue(Promise.resolve());
+            jest.spyOn(_paymentActionCreator, 'submitPayment').mockReturnValue(Promise.resolve());
+
+            const promise = processor.execute(getCybersourcePaymentData(), getOrderRequestBody(), getCreditCardInstrument());
+
+            return expect(promise).rejects.toBe(error);
         });
     });
 });

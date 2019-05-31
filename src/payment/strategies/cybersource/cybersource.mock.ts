@@ -100,3 +100,12 @@ export function getRejectAuthorizationPromise(): CardinalEventResponse {
         status: true,
     };
 }
+
+export function getCardinalValidatedDataWithSetupSuccess(): CardinalValidatedData {
+    return {
+        ActionCode: CardinalValidatedAction.SUCCCESS,
+        ErrorDescription: 'success',
+        ErrorNumber: 0,
+        Validated: false,
+    };
+}

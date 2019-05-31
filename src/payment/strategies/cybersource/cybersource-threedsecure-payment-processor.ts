@@ -135,6 +135,7 @@ export default class CyberSourceThreeDSecurePaymentProcessor {
                             this._paymentActionCreator.submitPayment({ ...payment, paymentData })
                         )
                     ).catch(error => {
+                        console.log(!(error instanceof RequestError));
                         if (!(error instanceof RequestError) || !some(error.body.errors, { code: 'enrolled_card' })) {
                             return Promise.reject(error);
                         }
