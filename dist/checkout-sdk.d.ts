@@ -2128,6 +2128,7 @@ declare interface CreditCardInstrument {
     ccCvv?: string;
     shouldSaveInstrument?: boolean;
     extraData?: any;
+    threeDSecure?: ThreeDSecure;
 }
 
 declare interface Currency {
@@ -2860,6 +2861,7 @@ declare interface PaymentMethod {
     nonce?: string;
     initializationData?: any;
     returnUrl?: string;
+    ccNumber?: string;
 }
 
 declare interface PaymentMethodConfig {
@@ -3043,6 +3045,7 @@ declare interface ShopperConfig {
 
 declare interface ShopperCurrency extends StoreCurrency {
     exchangeRate: number;
+    isTransactional: boolean;
 }
 
 /**
@@ -3168,6 +3171,17 @@ declare interface Tax {
 declare interface TextInputStyles extends InputStyles {
     placeholder?: InlineElementStyles;
 }
+
+declare type ThreeDSecure = Partial<{
+    version: string;
+    status: string;
+    vendor: string;
+    cavv: string;
+    eci: string;
+    xid: string;
+    token: string;
+    session: string;
+}>;
 
 declare interface TranslationData {
     [key: string]: string | number;
