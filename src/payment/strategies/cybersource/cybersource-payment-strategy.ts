@@ -5,6 +5,7 @@ import {
     NotInitializedError,
     NotInitializedErrorType,
 } from '../../../common/error/errors';
+import { OrderFinalizationNotRequiredError } from '../../../order/errors';
 import OrderRequestBody from '../../../order/order-request-body';
 import { CreditCardInstrument } from '../../payment';
 import PaymentMethod from '../../payment-method';
@@ -60,18 +61,10 @@ export default class CyberSourcePaymentStrategy implements PaymentStrategy {
     }
 
     finalize(options?: PaymentRequestOptions): Promise<InternalCheckoutSelectors> {
-        if (!this._processor) {
-            throw new NotInitializedError(NotInitializedErrorType.PaymentNotInitialized);
-        }
-
-        return this._processor.finalize(options);
+        return Promise.reject(new OrderFinalizationNotRequiredError());
     }
 
     deinitialize(options?: PaymentRequestOptions): Promise<InternalCheckoutSelectors> {
-        if (!this._processor) {
-            throw new NotInitializedError(NotInitializedErrorType.PaymentNotInitialized);
-        }
-
-        return this._processor.deinitialize(options);
+        return Promise.resolve(this._store.getState());
     }
 }
