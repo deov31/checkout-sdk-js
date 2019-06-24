@@ -2167,6 +2167,7 @@ declare interface CreditCardInstrument {
     ccCvv?: string;
     shouldSaveInstrument?: boolean;
     extraData?: any;
+    threeDSecure?: ThreeDSecure | ThreeDSecureToken;
 }
 
 declare interface Currency {
@@ -3301,6 +3302,20 @@ declare interface Tax {
 
 declare interface TextInputStyles extends InputStyles {
     placeholder?: InlineElementStyles;
+}
+
+declare interface ThreeDSecure {
+    version: string;
+    status: string;
+    vendor: string;
+    cavv: string;
+    eci: string;
+    xid: string;
+}
+
+declare interface ThreeDSecureToken {
+    token: string;
+    session?: string;
 }
 
 declare interface TranslationData {
