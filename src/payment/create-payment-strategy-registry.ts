@@ -24,6 +24,7 @@ import { AdyenV2PaymentStrategy, AdyenV2ScriptLoader } from './strategies/adyenv
 import { AffirmPaymentStrategy, AffirmScriptLoader } from './strategies/affirm';
 import { AfterpayPaymentStrategy, AfterpayScriptLoader } from './strategies/afterpay';
 import { AmazonPayPaymentStrategy, AmazonPayScriptLoader } from './strategies/amazon-pay';
+import { AmazonMaxoPaymentStrategy, AmazonMaxoScriptLoader } from './strategies/amazon-maxo';
 import { BlueSnapV2PaymentStrategy } from './strategies/bluesnapv2';
 import { createBraintreePaymentProcessor, createBraintreeVisaCheckoutPaymentProcessor, BraintreeCreditCardPaymentStrategy, BraintreePaypalPaymentStrategy, BraintreeScriptLoader, BraintreeSDKCreator, BraintreeVisaCheckoutPaymentStrategy, VisaCheckoutScriptLoader } from './strategies/braintree';
 import { CardinalClient, CardinalScriptLoader, CardinalThreeDSecureFlow } from './strategies/cardinal';
@@ -117,6 +118,16 @@ export default function createPaymentStrategyRegistry(
             new AmazonPayScriptLoader(scriptLoader)
         )
     );
+
+    registry.register(PaymentStrategyType.AMAZONMAXO, () =>
+    new AmazonMaxoPaymentStrategy(
+        store,
+        orderActionCreator,
+        billingAddressActionCreator,
+        remoteCheckoutActionCreator,
+        new AmazonMaxoScriptLoader(scriptLoader)
+    )
+);
 
     registry.register(PaymentStrategyType.BLUESNAPV2, () =>
         new BlueSnapV2PaymentStrategy(

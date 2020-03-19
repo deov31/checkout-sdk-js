@@ -3,6 +3,7 @@ enum PaymentStrategyType {
     AFFIRM = 'affirm',
     AFTERPAY = 'afterpay',
     AMAZON = 'amazon',
+    AMAZONMAXO = 'amazonmaxo',
     BLUESNAPV2 = 'bluesnapv2',
     CREDIT_CARD = 'creditcard',
     CYBERSOURCE = 'cybersource',
