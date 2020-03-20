@@ -1,3 +1,4 @@
+import { createFormPoster, FormPoster } from '@bigcommerce/form-poster';
 import { createRequestSender, RequestSender } from '@bigcommerce/request-sender';
 
 import { getCartState } from '../../../cart/carts.mock';
@@ -10,7 +11,9 @@ import { getAmazonMaxo, getPaymentMethodsState } from '../../../payment/payment-
 import { createAmazonMaxoPaymentProcessor, AmazonMaxoPaymentProcessor } from '../../../payment/strategies/amazon-maxo';
 import { getPaymentMethodMockUndefinedMerchant } from '../../../payment/strategies/amazon-maxo/amazon-maxo.mock';
 import { RemoteCheckoutActionCreator, RemoteCheckoutRequestSender } from '../../../remote-checkout';
+import createCustomerStrategyRegistry from '../../create-customer-strategy-registry';
 import { CustomerInitializeOptions } from '../../customer-request-options';
+import CustomerStrategyActionCreator from '../../customer-strategy-action-creator';
 import { getCustomerState } from '../../customers.mock';
 import CustomerStrategy from '../customer-strategy';
 
@@ -27,6 +30,8 @@ describe('AmazonMaxoCustomerStrategy', () => {
     let store: CheckoutStore;
     let strategy: CustomerStrategy;
     let walletButton: HTMLAnchorElement;
+    let formPoster: FormPoster;
+    let customerStrategyActionCreator: CustomerStrategyActionCreator;
 
     beforeEach(() => {
         paymentMethod = getAmazonMaxo();
@@ -46,17 +51,25 @@ describe('AmazonMaxoCustomerStrategy', () => {
         );
 
         paymentProcessor = createAmazonMaxoPaymentProcessor(store);
+        formPoster = createFormPoster();
+
+        const registry = createCustomerStrategyRegistry(store, createRequestSender());
+        customerStrategyActionCreator = new CustomerStrategyActionCreator(registry);
 
         strategy = new AmazonMaxoCustomerStrategy(
             store,
             remoteCheckoutActionCreator,
-            paymentProcessor
+            paymentProcessor,
+            customerStrategyActionCreator,
+            formPoster
         );
 
         jest.spyOn(store, 'dispatch')
             .mockReturnValue(Promise.resolve(store.getState()));
 
         jest.spyOn(paymentProcessor, 'initialize')
+            .mockReturnValue(Promise.resolve());
+        jest.spyOn(paymentProcessor, 'signout')
             .mockReturnValue(Promise.resolve());
 
         jest.spyOn(store.getState().paymentMethods, 'getPaymentMethod')
@@ -192,6 +205,7 @@ describe('AmazonMaxoCustomerStrategy', () => {
             await strategy.signOut(options);
 
             expect(remoteCheckoutActionCreator.signOut).toHaveBeenCalledWith('amazonmaxo', options);
+            expect(paymentProcessor.signout).toHaveBeenCalledWith('amazonmaxo');
             expect(store.dispatch).toHaveBeenCalled();
         });
 

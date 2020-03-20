@@ -51,6 +51,7 @@ describe('AmazonMaxoPaymentProcessor', () => {
             clientMock = {
                 renderButton: jest.fn(() => Promise.resolve(new HTMLElement())),
                 bindChangeAction: () => null,
+                signout: () => null,
             };
             amazonMaxoSDK.Pay.renderButton = jest.fn(() => clientMock);
 
@@ -80,12 +81,91 @@ describe('AmazonMaxoPaymentProcessor', () => {
         });
     });
 
+    describe('#deinitialize', () => {
+        it('deinitializes processor successfully', () => {
+            expect(processor.deinitialize()).toBeTruthy();
+        });
+    });
+
+    describe('#bindButton', () => {
+        const sessionId = 'ACB123';
+        const buttonName = 'bindableButton';
+
+        beforeEach(() => {
+            const amazonMaxoSDK = getAmazonMaxoSDKMock();
+            clientMock = {
+                renderButton: (jest.fn(() => Promise.resolve())),
+                bindChangeAction: jest.fn(),
+                signout: () => null,
+            };
+
+            amazonMaxoSDK.Pay = clientMock;
+
+            jest.spyOn(amazonMaxoScriptLoader, 'load').mockReturnValue(Promise.resolve(amazonMaxoSDK));
+            jest.spyOn(store, 'dispatch').mockReturnValue(Promise.resolve(store.getState()));
+            jest.spyOn(store.getState().paymentMethods, 'getPaymentMethod').mockReturnValue(getAmazonMaxo());
+            jest.spyOn(paymentMethodActionCreator, 'loadPaymentMethod').mockReturnValue(Promise.resolve(store.getState()));
+        });
+
+        it('bind the button successfully', async () => {
+            const bindOptions = {
+                amazonCheckoutSessionId: sessionId,
+                changeAction: 'changeAddress',
+            };
+
+            await processor.initialize('amazonMaxo');
+
+            processor.bindButton(buttonName, sessionId);
+
+            expect(clientMock.bindChangeAction).toHaveBeenCalledWith(buttonName, bindOptions);
+        });
+
+        it('does not bind the button if the processor is not initialized previously', () => {
+            expect(() => processor.bindButton(buttonName, sessionId)).toThrow(NotInitializedError);
+        });
+    });
+
+    describe('#signout', () => {
+        const methodId = 'amazonmaxo';
+
+        beforeEach(() => {
+            const amazonMaxoSDK = getAmazonMaxoSDKMock();
+            clientMock = {
+                renderButton: (jest.fn(() => Promise.resolve())),
+                bindChangeAction: jest.fn(),
+                signout:  jest.fn(),
+            };
+
+            amazonMaxoSDK.Pay = clientMock;
+
+            jest.spyOn(amazonMaxoScriptLoader, 'load').mockReturnValue(Promise.resolve(amazonMaxoSDK));
+            jest.spyOn(store, 'dispatch').mockReturnValue(Promise.resolve(store.getState()));
+            jest.spyOn(store.getState().paymentMethods, 'getPaymentMethod').mockReturnValue(getAmazonMaxo());
+            jest.spyOn(paymentMethodActionCreator, 'loadPaymentMethod').mockReturnValue(Promise.resolve(store.getState()));
+        });
+
+        it('loads the SDK when the SDK is not loaded', async () => {
+            await processor.signout(methodId);
+
+            expect(amazonMaxoScriptLoader.load).toHaveBeenCalled();
+        });
+
+        it('signouts succesfully when the SDK is previouly loaded', async () => {
+            await processor.initialize('amazonMaxo');
+
+            await processor.signout(methodId);
+
+            expect(clientMock.signout).toHaveBeenCalled();
+        });
+    });
+
     describe('#createButton', () => {
         beforeEach(() => {
             const amazonMaxoSDK = getAmazonMaxoSDKMock();
             clientMock = {
                 renderButton: jest.fn(() => Promise.resolve()),
                 bindChangeAction: () => null,
+                signout: () => null,
             };
 
             amazonMaxoSDK.Pay = clientMock;

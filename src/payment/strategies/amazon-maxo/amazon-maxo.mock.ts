@@ -7,6 +7,7 @@ export function getAmazonMaxoSDKMock(): AmazonMaxoSDK {
         Pay: {
             renderButton: jest.fn(),
             bindChangeAction: jest.fn(),
+            signout: jest.fn(),
         },
     };
 }

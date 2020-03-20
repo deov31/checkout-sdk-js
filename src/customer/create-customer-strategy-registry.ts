@@ -57,7 +57,9 @@ export default function createCustomerStrategyRegistry(
         new AmazonMaxoCustomerStrategy(
             store,
             remoteCheckoutActionCreator,
-            createAmazonMaxoPaymentProcessor(store)
+            createAmazonMaxoPaymentProcessor(store),
+            new CustomerStrategyActionCreator(registry),
+            formPoster
         )
     );
 

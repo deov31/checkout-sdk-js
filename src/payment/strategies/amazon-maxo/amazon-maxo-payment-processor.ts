@@ -21,12 +21,44 @@ export default class AmazonMaxoPaymentProcessor {
         return this._configureWallet();
     }
 
+    deinitialize(): Promise<void> {
+        this._amazonMaxoSDK = undefined;
+
+        return Promise.resolve();
+    }
+
+    bindButton(buttonId: string, sessionId: string): void {
+        if (!this._amazonMaxoSDK) {
+            throw new NotInitializedError(NotInitializedErrorType.PaymentNotInitialized);
+        }
+
+        this._amazonMaxoSDK.Pay.bindChangeAction(buttonId, {
+            amazonCheckoutSessionId: sessionId,
+            changeAction: 'changeAddress',
+          });
+    }
+
     createButton(containerId: string, params: AmazonMaxoButtonParams): HTMLElement {
         if (!this._amazonMaxoSDK) {
             throw new NotInitializedError(NotInitializedErrorType.PaymentNotInitialized);
         }
 
         return this._amazonMaxoSDK.Pay.renderButton(containerId, params);
+    }
+
+    signout(methodId: string): Promise<void> {
+        this._methodId = methodId;
+
+        if (!this._amazonMaxoSDK) {
+            this._configureWallet()
+            .then(() => {
+                return this.signout(methodId);
+            });
+        } else {
+            this._amazonMaxoSDK.Pay.signout();
+        }
+
+        return Promise.resolve();
     }
 
     private async _configureWallet(): Promise<void> {
