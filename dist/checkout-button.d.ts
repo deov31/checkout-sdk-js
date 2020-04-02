@@ -23,6 +23,52 @@ declare interface AddressRequestBody {
     }>;
 }
 
+declare interface AmazonMaxoButtonInitializeOptions {
+    containerId: string;
+    options: AmazonMaxoButtonParams;
+}
+
+declare interface AmazonMaxoButtonParams {
+    merchantId: string;
+    createCheckoutSession: AmazonMaxoCheckoutSession;
+    placement: AmazonMaxoPlacement;
+    ledgerCurrency: AmazonMaxoLedgerCurrency;
+    productType?: string;
+    checkoutLanguage?: AmazonMaxoCheckoutLanguage;
+    sandbox?: boolean;
+}
+
+declare enum AmazonMaxoCheckoutLanguage {
+    es_ES = "es_ES",
+    en_GB = "en_GB",
+    en_US = "en_US",
+    de_DE = "de_DE",
+    fr_FR = "fr_FR",
+    it_IT = "it_IT",
+    ja_JP = "ja_JP"
+}
+
+declare interface AmazonMaxoCheckoutSession {
+    url: string;
+    method?: string;
+    extractAmazonCheckoutSessionId?: string;
+}
+
+declare enum AmazonMaxoLedgerCurrency {
+    eu = "EUR",
+    jp = "JPY",
+    uk = "GBP",
+    us = "USD"
+}
+
+declare enum AmazonMaxoPlacement {
+    Home = "Home",
+    Product = "Product",
+    Cart = "Cart",
+    Checkout = "Checkout",
+    Other = "Other"
+}
+
 declare interface BraintreeError extends Error {
     type: 'CUSTOMER' | 'MERCHANT' | 'NETWORK' | 'INTERNAL' | 'UNKNOWN';
     code: string;
@@ -76,6 +122,11 @@ declare class CheckoutButtonErrorSelector {
 }
 
 declare interface CheckoutButtonInitializeOptions extends CheckoutButtonOptions {
+    /**
+     * The options that are required to facilitate AmazonMaxo. They can be
+     * omitted unless you need to support AmazonMaxo.
+     */
+    amazonmaxo?: AmazonMaxoButtonInitializeOptions;
     /**
      * The options that are required to facilitate Braintree PayPal. They can be
      * omitted unless you need to support Braintree PayPal.
@@ -202,6 +253,7 @@ declare interface CheckoutButtonInitializerOptions {
 }
 
 declare enum CheckoutButtonMethodType {
+    AMAZON_MAXO = "amazonmaxo",
     BRAINTREE_PAYPAL = "braintreepaypal",
     BRAINTREE_PAYPAL_CREDIT = "braintreepaypalcredit",
     GOOGLEPAY_AUTHORIZENET = "googlepayauthorizenet",

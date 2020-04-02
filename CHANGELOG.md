@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.57.1-alpha.641ac56b8a22bdfe66dc6f82f6806e2beba78b4c](https://github.com/bigcommerce/checkout-sdk-js/compare/v1.55.0...v1.57.1-alpha.641ac56b8a22bdfe66dc6f82f6806e2beba78b4c) (2020-04-02)
+
+
+### Bug Fixes
+
+* **payment:** INT-2418 Use SecurityNumber to validate safeguard ([e9cadb4](https://github.com/bigcommerce/checkout-sdk-js/commit/e9cadb4))
+* **payment:** INT-2427 Use ExpiryDate while paying with a vaulted Bancontact card rather than CVV ([1c67049](https://github.com/bigcommerce/checkout-sdk-js/commit/1c67049))
+* **payment:** INT-2431 Adds expiration date for Bancontact payments ([7249375](https://github.com/bigcommerce/checkout-sdk-js/commit/7249375))
+
+
+### Code Refactoring
+
+* **payment:** INT-2350 Style the object syntax in the test so it can easily be read ([46990e2](https://github.com/bigcommerce/checkout-sdk-js/commit/46990e2))
+* **payment:** INT-2350 Use createFromAction for every payment method ([d1a62e9](https://github.com/bigcommerce/checkout-sdk-js/commit/d1a62e9))
+
+
+### Features
+
+* **checkout:** INT-2001 Enable support for Store Credit on both versions of Klarna ([b05f46a](https://github.com/bigcommerce/checkout-sdk-js/commit/b05f46a))
+* **payment:** INT-1104 Add GooglePay on Auth.net ([98d8090](https://github.com/bigcommerce/checkout-sdk-js/commit/98d8090))
+* **payment:** INT-1710 Add support for ACH & Vipps on Adyen ([76a51ca](https://github.com/bigcommerce/checkout-sdk-js/commit/76a51ca))
+* **payment:** INT-2113 Checkout button strategy ([306b5e6](https://github.com/bigcommerce/checkout-sdk-js/commit/306b5e6))
+* **payment:** INT-2113 Checkout button strategy comments ([1075897](https://github.com/bigcommerce/checkout-sdk-js/commit/1075897))
+* **payment:** INT-2113 Checkout button strategy extra comments ([dd833b6](https://github.com/bigcommerce/checkout-sdk-js/commit/dd833b6))
+
 ## [1.57.0](https://github.com/bigcommerce/checkout-sdk-js/compare/v1.56.2...v1.57.0) (2020-03-26)
 
 

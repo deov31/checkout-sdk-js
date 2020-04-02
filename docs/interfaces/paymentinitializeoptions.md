@@ -19,6 +19,7 @@ A set of options that are required to initialize the payment step of the current
 
 * [adyenv2](paymentinitializeoptions.md#adyenv2)
 * [amazon](paymentinitializeoptions.md#amazon)
+* [amazonmaxo](paymentinitializeoptions.md#amazonmaxo)
 * [bluesnapv2](paymentinitializeoptions.md#bluesnapv2)
 * [braintree](paymentinitializeoptions.md#braintree)
 * [braintreevisacheckout](paymentinitializeoptions.md#braintreevisacheckout)
@@ -56,6 +57,15 @@ ___
 ### `<Optional>` amazon
 
 **● amazon**: *[AmazonPayPaymentInitializeOptions](amazonpaypaymentinitializeoptions.md)*
+
+The options that are required to initialize the Amazon Pay payment method. They can be omitted unless you need to support AmazonPay.
+
+___
+<a id="amazonmaxo"></a>
+
+### `<Optional>` amazonmaxo
+
+**● amazonmaxo**: *[AmazonMaxoPaymentInitializeOptions](amazonmaxopaymentinitializeoptions.md)*
 
 The options that are required to initialize the Amazon Pay payment method. They can be omitted unless you need to support AmazonPay.
 

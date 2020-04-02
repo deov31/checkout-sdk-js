@@ -20,6 +20,7 @@ Some payment methods have specific requirements for setting the customer details
 ### Properties
 
 * [amazon](customerinitializeoptions.md#amazon)
+* [amazonmaxo](customerinitializeoptions.md#amazonmaxo)
 * [braintreevisacheckout](customerinitializeoptions.md#braintreevisacheckout)
 * [chasepay](customerinitializeoptions.md#chasepay)
 * [googlepayauthorizenet](customerinitializeoptions.md#googlepayauthorizenet)
@@ -41,6 +42,15 @@ Some payment methods have specific requirements for setting the customer details
 **● amazon**: *[AmazonPayCustomerInitializeOptions](amazonpaycustomerinitializeoptions.md)*
 
 The options that are required to initialize the customer step of checkout when using Amazon Pay.
+
+___
+<a id="amazonmaxo"></a>
+
+### `<Optional>` amazonmaxo
+
+**● amazonmaxo**: *[AmazonMaxoCustomerInitializeOptions](amazonmaxocustomerinitializeoptions.md)*
+
+The options that are required to initialize the customer step of checkout when using Amazon Maxo.
 
 ___
 <a id="braintreevisacheckout"></a>
