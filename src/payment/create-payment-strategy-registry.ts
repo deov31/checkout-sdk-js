@@ -131,6 +131,7 @@ export default function createPaymentStrategyRegistry(
                 store,
                 new GooglePayAuthorizeNetInitializer()
             )
+        )
     );
 
     registry.register(PaymentStrategyType.AMAZONMAXO, () =>
