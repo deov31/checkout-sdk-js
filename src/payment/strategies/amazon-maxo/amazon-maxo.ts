@@ -72,3 +72,8 @@ export enum AmazonMaxoLedgerCurrency {
     uk = 'GBP',
     us = 'USD',
 }
+
+export enum AmazonMaxoPayOptions {
+    PayAndShip = 'PayAndShip',
+    PayOnly = 'PayOnly',
+}

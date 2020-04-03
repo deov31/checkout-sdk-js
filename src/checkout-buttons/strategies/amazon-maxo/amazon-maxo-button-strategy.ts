@@ -1,6 +1,6 @@
 import { CheckoutActionCreator, CheckoutStore } from '../../../checkout';
 import { InvalidArgumentError, MissingDataError, MissingDataErrorType } from '../../../common/error/errors';
-import { AmazonMaxoPaymentProcessor, AmazonMaxoPlacement } from '../../../payment/strategies/amazon-maxo';
+import { AmazonMaxoPaymentProcessor, AmazonMaxoPayOptions, AmazonMaxoPlacement } from '../../../payment/strategies/amazon-maxo';
 import { CheckoutButtonInitializeOptions } from '../../checkout-button-options';
 import CheckoutButtonStrategy from '../checkout-button-strategy';
 
@@ -41,6 +41,8 @@ export default class AmazonMaxoButtonStrategy implements CheckoutButtonStrategy 
 
         const state = this._store.getState();
         const paymentMethod = state.paymentMethods.getPaymentMethod(methodId);
+        const cart =  state.cart.getCart();
+        let productType = AmazonMaxoPayOptions.PayAndShip;
 
         const config = state.config.getStoreConfig();
 
@@ -70,13 +72,17 @@ export default class AmazonMaxoButtonStrategy implements CheckoutButtonStrategy 
             throw new InvalidArgumentError();
         }
 
+        if (cart && !cart.lineItems.physicalItems.length) {
+            productType = AmazonMaxoPayOptions.PayOnly;
+        }
+
         const amazonButtonOptions = {
             merchantId,
             sandbox: !!testMode,
             checkoutLanguage,
             ledgerCurrency,
             region,
-            productType: 'PayAndShip',
+            productType,
             createCheckoutSession: {
                 method: checkoutSessionMethod,
                 url: `${config.storeProfile.shopPath}/remote-checkout/${methodId}/payment-session`,

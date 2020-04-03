@@ -3,7 +3,7 @@ import { noop } from 'lodash';
 
 import { CheckoutStore, InternalCheckoutSelectors } from '../../../checkout';
 import { InvalidArgumentError, MissingDataError, MissingDataErrorType, NotImplementedError } from '../../../common/error/errors';
-import { AmazonMaxoPaymentProcessor, AmazonMaxoPlacement } from '../../../payment/strategies/amazon-maxo';
+import { AmazonMaxoPaymentProcessor, AmazonMaxoPayOptions, AmazonMaxoPlacement } from '../../../payment/strategies/amazon-maxo';
 import { RemoteCheckoutActionCreator } from '../../../remote-checkout';
 import { CustomerInitializeOptions, CustomerRequestOptions } from '../../customer-request-options';
 import CustomerStrategyActionCreator from '../../customer-strategy-action-creator';
@@ -91,6 +91,8 @@ export default class AmazonMaxoCustomerStrategy implements CustomerStrategy {
         const state = this._store.getState();
         const paymentMethod = state.paymentMethods.getPaymentMethod(methodId);
         const config = state.config.getStoreConfig();
+        const cart =  state.cart.getCart();
+        let productType = AmazonMaxoPayOptions.PayAndShip;
         if (!config) {
             throw new MissingDataError(MissingDataErrorType.MissingCheckoutConfig);
         }
@@ -117,13 +119,17 @@ export default class AmazonMaxoCustomerStrategy implements CustomerStrategy {
             throw new InvalidArgumentError('Unable to create sign-in button without valid merchant ID.');
         }
 
+        if (cart && !cart.lineItems.physicalItems.length) {
+            productType = AmazonMaxoPayOptions.PayOnly;
+        }
+
         const amazonButtonOptions = {
             merchantId,
             sandbox: !!testMode,
             checkoutLanguage,
             ledgerCurrency,
             region,
-            productType: 'PayAndShip',
+            productType,
             createCheckoutSession: {
                 method: checkoutSessionMethod,
                 url: `${config.storeProfile.shopPath}/remote-checkout/${methodId}/payment-session`,
