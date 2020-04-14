@@ -39,7 +39,7 @@ export interface AmazonMaxoChangeActionOptions {
     changeAction: string;
 }
 
-export type EditableAddressType = 'billing' | 'shipping';
+export type EditableAddressType = 'billing' | 'shipping' | 'method';
 
 export enum AmazonMaxoRegions {
     de = 'eu',
