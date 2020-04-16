@@ -141,7 +141,8 @@ export default function createPaymentStrategyRegistry(
             paymentMethodActionCreator,
             orderActionCreator,
             paymentActionCreator,
-            createAmazonMaxoPaymentProcessor(store)
+            createAmazonMaxoPaymentProcessor(store),
+            formPoster
         )
     );
 

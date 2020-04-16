@@ -1,5 +1,5 @@
 import { createClient as createPaymentClient } from '@bigcommerce/bigpay-client';
-import { createAction } from '@bigcommerce/data-store';
+import { createAction, createErrorAction } from '@bigcommerce/data-store';
 import { createRequestSender, RequestSender } from '@bigcommerce/request-sender';
 import { createScriptLoader } from '@bigcommerce/script-loader';
 import { merge, omit } from 'lodash';
@@ -7,6 +7,8 @@ import { of, Observable } from 'rxjs';
 
 import { createCheckoutStore, CheckoutRequestSender, CheckoutStore, CheckoutValidator } from '../../../checkout';
 import { getCheckoutStoreState } from '../../../checkout/checkouts.mock';
+import { RequestError } from '../../../common/error/errors';
+import { getResponse } from '../../../common/http-request/responses.mock';
 import { InvalidArgumentError, MissingDataError } from '../../../common/error/errors';
 import { FinalizeOrderAction, OrderActionCreator, OrderActionType, OrderRequestBody, OrderRequestSender, SubmitOrderAction } from '../../../order';
 import { OrderFinalizationNotRequiredError } from '../../../order/errors';
@@ -17,7 +19,7 @@ import { getAmazonMaxo } from '../../../payment/payment-methods.mock';
 import { AmazonMaxoPaymentProcessor } from '../../../payment/strategies/amazon-maxo';
 import { createSpamProtection, SpamProtectionActionCreator, SpamProtectionRequestSender } from '../../../spam-protection';
 import { PaymentArgumentInvalidError } from '../../errors';
-import { InitializeOffsitePaymentAction, PaymentActionType } from '../../payment-actions';
+import { PaymentActionType } from '../../payment-actions';
 import PaymentMethodRequestSender from '../../payment-method-request-sender';
 import { PaymentInitializeOptions } from '../../payment-request-options';
 import PaymentRequestSender from '../../payment-request-sender';
@@ -28,6 +30,8 @@ import PaymentStrategyActionCreator from '../../payment-strategy-action-creator'
 import AmazonMaxoPaymentInitializeOptions from './amazon-maxo-payment-initialize-options';
 import AmazonMaxoPaymentStrategy from './amazon-maxo-payment-strategy';
 import createAmazonMaxoPaymentProcessor from './create-amazon-maxo-payment-processor';
+import { getErrorPaymentResponseBody } from '../../payments.mock';
+import { createFormPoster, FormPoster } from '@bigcommerce/form-poster';
 
 describe('AmazonMaxoPaymentStrategy', () => {
     let amazonMaxoPaymentProcessor: AmazonMaxoPaymentProcessor;
@@ -35,7 +39,7 @@ describe('AmazonMaxoPaymentStrategy', () => {
     let editBillingButton: HTMLDivElement;
     let editShippingButton: HTMLDivElement;
     let finalizeOrderAction: Observable<FinalizeOrderAction>;
-    let initializeOffsitePaymentAction: Observable<InitializeOffsitePaymentAction>;
+    let formPoster: FormPoster
     let orderActionCreator: OrderActionCreator;
     let paymentActionCreator: PaymentActionCreator;
     let paymentMethodActionCreator: PaymentMethodActionCreator;
@@ -52,6 +56,7 @@ describe('AmazonMaxoPaymentStrategy', () => {
         amazonMaxoPaymentProcessor = createAmazonMaxoPaymentProcessor(store);
         requestSender = createRequestSender();
         signInCustomer = jest.fn();
+        formPoster = createFormPoster();
 
         const paymentClient = createPaymentClient(store);
         const spamProtection = createSpamProtection(createScriptLoader());
@@ -78,7 +83,6 @@ describe('AmazonMaxoPaymentStrategy', () => {
         paymentMethodActionCreator = new PaymentMethodActionCreator(paymentMethodRequestSender);
 
         finalizeOrderAction = of(createAction(OrderActionType.FinalizeOrderRequested));
-        initializeOffsitePaymentAction = of(createAction(PaymentActionType.InitializeOffsitePaymentRequested));
         submitOrderAction = of(createAction(OrderActionType.SubmitOrderRequested));
         paymentMethodMock = { ...getAmazonMaxo(), initializationData: { paymentToken: undefined } };
 
@@ -94,7 +98,6 @@ describe('AmazonMaxoPaymentStrategy', () => {
         editBillingButton.setAttribute('id', 'edit-billing-address-button');
         document.body.appendChild(editBillingButton);
         finalizeOrderAction = of(createAction(OrderActionType.FinalizeOrderRequested));
-        initializeOffsitePaymentAction = of(createAction(PaymentActionType.InitializeOffsitePaymentRequested));
 
         jest.spyOn(store, 'dispatch');
 
@@ -116,6 +119,9 @@ describe('AmazonMaxoPaymentStrategy', () => {
         jest.spyOn(orderActionCreator, 'submitOrder')
             .mockReturnValue(submitOrderAction);
 
+        jest.spyOn(formPoster, 'postForm')
+            .mockImplementation((_url, _data, callback = () => {}) => callback());
+
         jest.spyOn(paymentMethodActionCreator, 'loadPaymentMethod')
             .mockResolvedValue(store.getState());
 
@@ -125,15 +131,14 @@ describe('AmazonMaxoPaymentStrategy', () => {
         jest.spyOn(store.getState().paymentMethods, 'getPaymentMethod')
             .mockReturnValue(paymentMethodMock);
 
-        jest.spyOn(paymentActionCreator, 'initializeOffsitePayment')
-            .mockReturnValue(initializeOffsitePaymentAction);
-
+        
         strategy = new AmazonMaxoPaymentStrategy(store,
             paymentStrategyActionCreator,
             paymentMethodActionCreator,
             orderActionCreator,
             paymentActionCreator,
-            amazonMaxoPaymentProcessor
+            amazonMaxoPaymentProcessor,
+            formPoster
         );
     });
 
@@ -277,7 +282,6 @@ describe('AmazonMaxoPaymentStrategy', () => {
             await strategy.execute(orderRequestBody, initializeOptions);
 
             expect(orderActionCreator.submitOrder).toHaveBeenCalledWith(omit(orderRequestBody, 'payment'), initializeOptions);
-            expect(paymentActionCreator.initializeOffsitePayment).toHaveBeenCalledWith('amazonmaxo', undefined, paymentToken);
         });
 
         it('fails to execute if strategy is not initialized', () => {
@@ -286,7 +290,8 @@ describe('AmazonMaxoPaymentStrategy', () => {
                 paymentMethodActionCreator,
                 orderActionCreator,
                 paymentActionCreator,
-                amazonMaxoPaymentProcessor
+                amazonMaxoPaymentProcessor,
+                formPoster
             );
 
             expect(strategy.execute(orderRequestBody, initializeOptions)).rejects.toThrow(MissingDataError);
@@ -307,6 +312,35 @@ describe('AmazonMaxoPaymentStrategy', () => {
             await strategy.initialize(initializeOptions);
 
             expect(strategy.execute(orderRequestBody, initializeOptions)).rejects.toThrow(PaymentArgumentInvalidError);
+        });
+
+        it('posts 3ds data to Sage if 3ds is enabled', async () => {
+            const error = new RequestError(getResponse({
+                ...getErrorPaymentResponseBody(),
+                errors: [
+                    { code: 'three_d_secure_required' },
+                ],
+                three_ds_result: {
+                    acs_url: 'https://acs/url',
+                    callback_url: 'https://callback/url',
+                    payer_auth_request: 'payer_auth_request',
+                    merchant_data: 'merchant_data',
+                },
+                status: 'error',
+            }));
+    
+            jest.spyOn(paymentActionCreator, 'submitPayment')
+                .mockReturnValue(of(createErrorAction(PaymentActionType.SubmitPaymentFailed, error)));
+    
+            await strategy.execute(getOrderRequestBody());
+    
+            await new Promise(resolve => process.nextTick(resolve));
+    
+            expect(formPoster.postForm).toHaveBeenCalledWith('https://acs/url', {
+                PaReq: 'payer_auth_request',
+                TermUrl: 'https://callback/url',
+                MD: 'merchant_data',
+            }, undefined, '_top');
         });
     });
 
