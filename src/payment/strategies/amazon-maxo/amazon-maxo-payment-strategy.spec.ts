@@ -1,5 +1,6 @@
 import { createClient as createPaymentClient } from '@bigcommerce/bigpay-client';
 import { createAction, createErrorAction } from '@bigcommerce/data-store';
+import { createFormPoster, FormPoster } from '@bigcommerce/form-poster';
 import { createRequestSender, RequestSender } from '@bigcommerce/request-sender';
 import { createScriptLoader } from '@bigcommerce/script-loader';
 import { merge, omit } from 'lodash';
@@ -7,9 +8,8 @@ import { of, Observable } from 'rxjs';
 
 import { createCheckoutStore, CheckoutRequestSender, CheckoutStore, CheckoutValidator } from '../../../checkout';
 import { getCheckoutStoreState } from '../../../checkout/checkouts.mock';
-import { RequestError } from '../../../common/error/errors';
+import { InvalidArgumentError, MissingDataError, RequestError } from '../../../common/error/errors';
 import { getResponse } from '../../../common/http-request/responses.mock';
-import { InvalidArgumentError, MissingDataError } from '../../../common/error/errors';
 import { FinalizeOrderAction, OrderActionCreator, OrderActionType, OrderRequestBody, OrderRequestSender, SubmitOrderAction } from '../../../order';
 import { OrderFinalizationNotRequiredError } from '../../../order/errors';
 import { getIncompleteOrder, getOrderRequestBody, getSubmittedOrder } from '../../../order/internal-orders.mock';
@@ -17,21 +17,22 @@ import { getOrder } from '../../../order/orders.mock';
 import { createPaymentStrategyRegistry, PaymentActionCreator, PaymentMethod, PaymentMethodActionCreator } from '../../../payment';
 import { getAmazonMaxo } from '../../../payment/payment-methods.mock';
 import { AmazonMaxoPaymentProcessor } from '../../../payment/strategies/amazon-maxo';
+import { getPaymentMethodMockUndefinedMerchant } from '../../../payment/strategies/amazon-maxo/amazon-maxo.mock';
 import { createSpamProtection, SpamProtectionActionCreator, SpamProtectionRequestSender } from '../../../spam-protection';
 import { PaymentArgumentInvalidError } from '../../errors';
-import { PaymentActionType } from '../../payment-actions';
+import { PaymentActionType, SubmitPaymentAction } from '../../payment-actions';
 import PaymentMethodRequestSender from '../../payment-method-request-sender';
 import { PaymentInitializeOptions } from '../../payment-request-options';
 import PaymentRequestSender from '../../payment-request-sender';
 import PaymentRequestTransformer from '../../payment-request-transformer';
 import * as paymentStatusTypes from '../../payment-status-types';
 import PaymentStrategyActionCreator from '../../payment-strategy-action-creator';
+import { PaymentStrategyActionType } from '../../payment-strategy-actions';
+import { getErrorPaymentResponseBody } from '../../payments.mock';
 
 import AmazonMaxoPaymentInitializeOptions from './amazon-maxo-payment-initialize-options';
 import AmazonMaxoPaymentStrategy from './amazon-maxo-payment-strategy';
 import createAmazonMaxoPaymentProcessor from './create-amazon-maxo-payment-processor';
-import { getErrorPaymentResponseBody } from '../../payments.mock';
-import { createFormPoster, FormPoster } from '@bigcommerce/form-poster';
 
 describe('AmazonMaxoPaymentStrategy', () => {
     let amazonMaxoPaymentProcessor: AmazonMaxoPaymentProcessor;
@@ -39,7 +40,7 @@ describe('AmazonMaxoPaymentStrategy', () => {
     let editBillingButton: HTMLDivElement;
     let editShippingButton: HTMLDivElement;
     let finalizeOrderAction: Observable<FinalizeOrderAction>;
-    let formPoster: FormPoster
+    let formPoster: FormPoster;
     let orderActionCreator: OrderActionCreator;
     let paymentActionCreator: PaymentActionCreator;
     let paymentMethodActionCreator: PaymentMethodActionCreator;
@@ -62,6 +63,8 @@ describe('AmazonMaxoPaymentStrategy', () => {
         const spamProtection = createSpamProtection(createScriptLoader());
         const registry = createPaymentStrategyRegistry(store, paymentClient, requestSender, spamProtection, 'en_US');
         const paymentMethodRequestSender: PaymentMethodRequestSender = new PaymentMethodRequestSender(requestSender);
+        const widgetInteractionAction = of(createAction(PaymentStrategyActionType.WidgetInteractionStarted));
+        let submitPaymentAction: Observable<SubmitPaymentAction>;
 
         orderActionCreator = new OrderActionCreator(
             new OrderRequestSender(createRequestSender()),
@@ -98,6 +101,7 @@ describe('AmazonMaxoPaymentStrategy', () => {
         editBillingButton.setAttribute('id', 'edit-billing-address-button');
         document.body.appendChild(editBillingButton);
         finalizeOrderAction = of(createAction(OrderActionType.FinalizeOrderRequested));
+        submitPaymentAction = of(createAction(PaymentActionType.SubmitPaymentRequested));
 
         jest.spyOn(store, 'dispatch');
 
@@ -126,12 +130,14 @@ describe('AmazonMaxoPaymentStrategy', () => {
             .mockResolvedValue(store.getState());
 
         jest.spyOn(paymentStrategyActionCreator, 'widgetInteraction')
-            .mockResolvedValue(store.getState());
+            .mockImplementation(() => widgetInteractionAction);
 
         jest.spyOn(store.getState().paymentMethods, 'getPaymentMethod')
             .mockReturnValue(paymentMethodMock);
 
-        
+        jest.spyOn(paymentActionCreator, 'submitPayment')
+            .mockReturnValue(submitPaymentAction);
+
         strategy = new AmazonMaxoPaymentStrategy(store,
             paymentStrategyActionCreator,
             paymentMethodActionCreator,
@@ -180,12 +186,58 @@ describe('AmazonMaxoPaymentStrategy', () => {
             initializeOptions = { methodId: 'amazonmaxo', amazonmaxo: amazonmaxoInitializeOptions };
         });
 
-        it('creates the signing button if no paymentToken is present on initializationData', async () => {
+        it('creates the signin button if no paymentToken is present on initializationData', async () => {
             await strategy.initialize(initializeOptions);
 
             expect(amazonMaxoPaymentProcessor.bindButton).not.toHaveBeenCalled();
             expect(amazonMaxoPaymentProcessor.initialize).toHaveBeenCalledWith(paymentMethodMock.id);
             expect(amazonMaxoPaymentProcessor.createButton).toHaveBeenCalledWith(`#${amazonmaxoInitializeOptions.container}`, expect.any(Object));
+        });
+
+        it('fails to initialize the strategy if no PaymentMethod is supplied', async () => {
+            jest.spyOn(store.getState().paymentMethods, 'getPaymentMethod').mockReturnValue(undefined);
+
+            await expect(strategy.initialize(initializeOptions)).rejects.toThrow(MissingDataError);
+        });
+
+        it('initialize the strategy and validates if cart contains physical items', async () => {
+            jest.spyOn(store.getState().cart, 'getCart')
+            .mockReturnValue({...store.getState().cart.getCart(), lineItems: {physicalItems: []}});
+            await strategy.initialize(initializeOptions);
+
+            expect(amazonMaxoPaymentProcessor.createButton).toHaveBeenCalled();
+        });
+
+        it('fails to initialize the strategy if amazonmaxoInitializeOptions invalid are provided ', async () => {
+            amazonmaxoInitializeOptions = { container: 'invalid_container', signInCustomer };
+            initializeOptions = { methodId: 'amazonmaxo', amazonmaxo: amazonmaxoInitializeOptions };
+
+            await expect(strategy.initialize(initializeOptions)).rejects.toThrow(InvalidArgumentError);
+        });
+
+        it('fails to initialize the strategy if no methodid is supplied', async () => {
+            initializeOptions = { methodId: '', amazonmaxo: amazonmaxoInitializeOptions };
+
+            await expect(strategy.initialize(initializeOptions)).rejects.toThrow(MissingDataError);
+        });
+
+        it('fails to initialize the strategy if config is not initialized', async () => {
+            jest.spyOn(store.getState().config, 'getStoreConfig').mockReturnValue(undefined);
+
+            await expect(strategy.initialize(initializeOptions)).rejects.toThrow(MissingDataError);
+        });
+
+        it('fails initialize the strategy if merchantId is not supplied', async () => {
+            jest.spyOn(store.getState().paymentMethods, 'getPaymentMethod').mockReturnValue(getPaymentMethodMockUndefinedMerchant());
+
+            await expect(strategy.initialize(initializeOptions)).rejects.toThrow(InvalidArgumentError);
+        });
+
+        it('fails to create signInButton  if get Payment method fails', async () => {
+            jest.spyOn(store.getState().paymentMethods, 'getPaymentMethod').mockReturnValue(undefined);
+            jest.spyOn(store.getState().paymentMethods, 'getPaymentMethod') .mockReturnValueOnce(paymentMethodMock);
+
+            await expect(strategy.initialize(initializeOptions)).rejects.toThrow(MissingDataError);
         });
 
         it('binds edit buttons if paymentToken is present on initializationData', async () => {
@@ -274,7 +326,7 @@ describe('AmazonMaxoPaymentStrategy', () => {
             expect(paymentStrategyActionCreator.widgetInteraction).toHaveBeenCalled();
         });
 
-        it('starts offsite flow if paymentToken is found on intializationData', async () => {
+        it('starts flow if paymentToken is found on intializationData', async () => {
             paymentMethodMock.initializationData.paymentToken = paymentToken;
 
             await strategy.initialize(initializeOptions);
@@ -314,7 +366,7 @@ describe('AmazonMaxoPaymentStrategy', () => {
             expect(strategy.execute(orderRequestBody, initializeOptions)).rejects.toThrow(PaymentArgumentInvalidError);
         });
 
-        it('posts 3ds data to Sage if 3ds is enabled', async () => {
+        it('redirects to Amazon url', async () => {
             const error = new RequestError(getResponse({
                 ...getErrorPaymentResponseBody(),
                 errors: [
@@ -328,19 +380,32 @@ describe('AmazonMaxoPaymentStrategy', () => {
                 },
                 status: 'error',
             }));
-    
+
             jest.spyOn(paymentActionCreator, 'submitPayment')
                 .mockReturnValue(of(createErrorAction(PaymentActionType.SubmitPaymentFailed, error)));
-    
-            await strategy.execute(getOrderRequestBody());
-    
+
+            paymentMethodMock.initializationData.paymentToken = paymentToken;
+
+            await strategy.initialize(initializeOptions);
+            strategy.execute(orderRequestBody, initializeOptions);
+
             await new Promise(resolve => process.nextTick(resolve));
-    
-            expect(formPoster.postForm).toHaveBeenCalledWith('https://acs/url', {
-                PaReq: 'payer_auth_request',
-                TermUrl: 'https://callback/url',
-                MD: 'merchant_data',
-            }, undefined, '_top');
+
+            expect(formPoster.postForm).toHaveBeenCalledWith('https://acs/url', {});
+        });
+
+        it('does not redirect to Amazon url', async () => {
+            const response = new RequestError(getResponse(getErrorPaymentResponseBody()));
+
+            jest.spyOn(paymentActionCreator, 'submitPayment')
+                .mockReturnValue(of(createErrorAction(PaymentActionType.SubmitPaymentFailed, response)));
+
+            paymentMethodMock.initializationData.paymentToken = paymentToken;
+
+            await strategy.initialize(initializeOptions);
+            strategy.execute(orderRequestBody, initializeOptions);
+
+            expect(formPoster.postForm).not.toHaveBeenCalled();
         });
     });
 

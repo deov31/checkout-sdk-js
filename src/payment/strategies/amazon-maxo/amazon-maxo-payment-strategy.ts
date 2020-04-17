@@ -21,7 +21,6 @@ export default class AmazonMaxoPaymentStrategy implements PaymentStrategy {
     private _methodId?: string;
     private _walletButton?: HTMLElement;
     private _signInCustomer?: () => Promise<void>;
-    
 
     constructor(
         private _store: CheckoutStore,
@@ -30,7 +29,7 @@ export default class AmazonMaxoPaymentStrategy implements PaymentStrategy {
         private _orderActionCreator: OrderActionCreator,
         private _paymentActionCreator: PaymentActionCreator,
         private _amazonMaxoPaymentProcessor: AmazonMaxoPaymentProcessor,
-        private _formPoster: FormPoster,
+        private _formPoster: FormPoster
     ) { }
 
     async initialize(options: PaymentInitializeOptions): Promise<InternalCheckoutSelectors> {
@@ -74,7 +73,6 @@ export default class AmazonMaxoPaymentStrategy implements PaymentStrategy {
         if (!this._methodId) {
             throw new MissingDataError(MissingDataErrorType.MissingPaymentMethod);
         }
-console.log('TESTING');
 
         const state = await this._store.dispatch(this._paymentMethodActionCreator.loadPaymentMethod(this._methodId));
         const paymentMethod = state.paymentMethods.getPaymentMethod(this._methodId);
@@ -93,13 +91,12 @@ console.log('TESTING');
                 throw new PaymentArgumentInvalidError(['payment']);
             }
 
-            try{
-                await  this._store.dispatch(this._orderActionCreator.submitOrder(order, options));        
-                let paymentRequest = await this._store.dispatch(this._paymentActionCreator.submitPayment({ ...payment, paymentData }));
+            try {
+                await this._store.dispatch(this._orderActionCreator.submitOrder(order, options));
+                const paymentRequest = await this._store.dispatch(this._paymentActionCreator.submitPayment({...payment, paymentData }));
+
                 return paymentRequest;
-            }
-            catch(error) {
-                error.body.errors.push({code: 'three_d_secure_required'});
+            } catch (error) {
                 if (!(error instanceof RequestError) || !some(error.body.errors, { code: 'three_d_secure_required' })) {
                     return Promise.reject(error);
                 }
