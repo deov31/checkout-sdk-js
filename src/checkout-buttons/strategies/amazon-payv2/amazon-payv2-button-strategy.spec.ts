@@ -104,6 +104,25 @@ describe('AmazonPayv2ButtonStrategy', () => {
                 });
         });
 
+        it('Creates the button and validates if cart contains physical items', async () => {
+            checkoutButtonOptions = getAmazonPayv2CheckoutButtonOptions();
+            jest.spyOn(store.getState().cart, 'getCart')
+            .mockReturnValue({...store.getState().cart.getCart(), lineItems : {physicalItems: []}});
+            await strategy.initialize(checkoutButtonOptions);
+
+            expect(paymentProcessor.createButton).toHaveBeenCalledWith(
+                '#amazonpayCheckoutButton', {
+                    checkoutLanguage: 'en_US',
+                    createCheckoutSession: {url: 'https://store-k1drp8k8.bcapp.dev/remote-checkout/amazonpay/payment-session'},
+                    ledgerCurrency: 'USD',
+                    merchantId: 'checkout_amazonpay',
+                    placement: 'Cart',
+                    productType: 'PayOnly',
+                    region: 'us',
+                    sandbox: true,
+                });
+        });
+
         it('fails to create button if not PaymentMethod is supplied', async () => {
             jest.spyOn(store.getState().paymentMethods, 'getPaymentMethod').mockReturnValue(undefined);
             checkoutButtonOptions = getAmazonPayv2CheckoutButtonOptions();

@@ -1,3 +1,4 @@
+import { createFormPoster, FormPoster } from '@bigcommerce/form-poster';
 import { createRequestSender, RequestSender } from '@bigcommerce/request-sender';
 
 import { getCartState } from '../../../cart/carts.mock';
@@ -10,7 +11,9 @@ import { getAmazonPayv2, getPaymentMethodsState } from '../../../payment/payment
 import { createAmazonPayv2PaymentProcessor, AmazonPayv2PaymentProcessor } from '../../../payment/strategies/amazon-payv2';
 import { getPaymentMethodMockUndefinedMerchant } from '../../../payment/strategies/amazon-payv2/amazon-payv2.mock';
 import { RemoteCheckoutActionCreator, RemoteCheckoutRequestSender } from '../../../remote-checkout';
+import createCustomerStrategyRegistry from '../../create-customer-strategy-registry';
 import { CustomerInitializeOptions } from '../../customer-request-options';
+import CustomerStrategyActionCreator from '../../customer-strategy-action-creator';
 import { getCustomerState } from '../../customers.mock';
 import CustomerStrategy from '../customer-strategy';
 
@@ -20,6 +23,8 @@ import { getAmazonPayv2CustomerInitializeOptions, Mode } from './amazon-payv2-cu
 describe('AmazonPayv2CustomerStrategy', () => {
     let container: HTMLDivElement;
     let customerInitializeOptions: CustomerInitializeOptions;
+    let customerStrategyActionCreator: CustomerStrategyActionCreator;
+    let formPoster: FormPoster;
     let paymentMethod: PaymentMethod;
     let paymentProcessor: AmazonPayv2PaymentProcessor;
     let remoteCheckoutActionCreator: RemoteCheckoutActionCreator;
@@ -46,11 +51,17 @@ describe('AmazonPayv2CustomerStrategy', () => {
         );
 
         paymentProcessor = createAmazonPayv2PaymentProcessor(store);
+        formPoster = createFormPoster();
+
+        const registry = createCustomerStrategyRegistry(store, createRequestSender());
+        customerStrategyActionCreator = new CustomerStrategyActionCreator(registry);
 
         strategy = new AmazonPayv2CustomerStrategy(
             store,
             remoteCheckoutActionCreator,
-            paymentProcessor
+            paymentProcessor,
+            customerStrategyActionCreator,
+            formPoster
         );
 
         jest.spyOn(store, 'dispatch')
@@ -58,6 +69,9 @@ describe('AmazonPayv2CustomerStrategy', () => {
 
         jest.spyOn(paymentProcessor, 'initialize')
             .mockReturnValue(Promise.resolve());
+
+        jest.spyOn(paymentProcessor, 'signout')
+        .mockReturnValue(Promise.resolve());
 
         jest.spyOn(store.getState().paymentMethods, 'getPaymentMethod')
             .mockReturnValue(paymentMethod);
@@ -83,6 +97,15 @@ describe('AmazonPayv2CustomerStrategy', () => {
         it('Creates the button', async () => {
             customerInitializeOptions = getAmazonPayv2CustomerInitializeOptions();
 
+            await strategy.initialize(customerInitializeOptions);
+
+            expect(paymentProcessor.createButton).toHaveBeenCalled();
+        });
+
+        it('Creates the button and validates if cart contains physical items', async () => {
+            customerInitializeOptions = getAmazonPayv2CustomerInitializeOptions();
+            jest.spyOn(store.getState().cart, 'getCart')
+            .mockReturnValue({...store.getState().cart.getCart(), lineItems: {physicalItems: []}});
             await strategy.initialize(customerInitializeOptions);
 
             expect(paymentProcessor.createButton).toHaveBeenCalled();
@@ -192,6 +215,7 @@ describe('AmazonPayv2CustomerStrategy', () => {
             await strategy.signOut(options);
 
             expect(remoteCheckoutActionCreator.signOut).toHaveBeenCalledWith('amazonpay', options);
+            expect(paymentProcessor.signout).toHaveBeenCalledWith('amazonpay');
             expect(store.dispatch).toHaveBeenCalled();
         });
 

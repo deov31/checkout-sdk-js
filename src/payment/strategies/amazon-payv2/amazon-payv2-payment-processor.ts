@@ -21,12 +21,44 @@ export default class AmazonPayv2PaymentProcessor {
         return this._configureWallet();
     }
 
+    deinitialize(): Promise<void> {
+        this._amazonPayv2SDK = undefined;
+
+        return Promise.resolve();
+    }
+
+    bindButton(buttonId: string, sessionId: string): void {
+        if (!this._amazonPayv2SDK) {
+            throw new NotInitializedError(NotInitializedErrorType.PaymentNotInitialized);
+        }
+
+        this._amazonPayv2SDK.Pay.bindChangeAction(buttonId, {
+            amazonCheckoutSessionId: sessionId,
+            changeAction: 'changeAddress',
+          });
+    }
+
     createButton(containerId: string, params: AmazonPayv2ButtonParams): HTMLElement {
         if (!this._amazonPayv2SDK) {
             throw new NotInitializedError(NotInitializedErrorType.PaymentNotInitialized);
         }
 
         return this._amazonPayv2SDK.Pay.renderButton(containerId, params);
+    }
+
+    signout(methodId: string): Promise<void> {
+        this._methodId = methodId;
+
+        if (!this._amazonPayv2SDK) {
+            this._configureWallet()
+                .then(() => {
+                    return this.signout(methodId);
+                });
+        } else {
+            this._amazonPayv2SDK.Pay.signout();
+        }
+
+        return Promise.resolve();
     }
 
     private async _configureWallet(): Promise<void> {

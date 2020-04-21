@@ -1,6 +1,6 @@
 import { CheckoutActionCreator, CheckoutStore } from '../../../checkout';
 import { InvalidArgumentError, MissingDataError, MissingDataErrorType } from '../../../common/error/errors';
-import { AmazonPayv2PaymentProcessor, AmazonPayv2Placement } from '../../../payment/strategies/amazon-payv2';
+import { AmazonPayv2PaymentProcessor, AmazonPayv2PayOptions, AmazonPayv2Placement } from '../../../payment/strategies/amazon-payv2';
 import { CheckoutButtonInitializeOptions } from '../../checkout-button-options';
 import CheckoutButtonStrategy from '../checkout-button-strategy';
 
@@ -41,7 +41,8 @@ export default class AmazonPayv2ButtonStrategy implements CheckoutButtonStrategy
 
         const state = this._store.getState();
         const paymentMethod = state.paymentMethods.getPaymentMethod(methodId);
-
+        const cart =  state.cart.getCart();
+        let productType = AmazonPayv2PayOptions.PayAndShip;
         const config = state.config.getStoreConfig();
 
         if (!config) {
@@ -70,13 +71,17 @@ export default class AmazonPayv2ButtonStrategy implements CheckoutButtonStrategy
             throw new InvalidArgumentError();
         }
 
+        if (cart && !cart.lineItems.physicalItems.length) {
+            productType = AmazonPayv2PayOptions.PayOnly;
+        }
+
         const amazonButtonOptions = {
             merchantId,
             sandbox: !!testMode,
             checkoutLanguage,
             ledgerCurrency,
             region,
-            productType: 'PayAndShip',
+            productType,
             createCheckoutSession: {
                 method: checkoutSessionMethod,
                 url: `${config.storeProfile.shopPath}/remote-checkout/${methodId}/payment-session`,

@@ -1,6 +1,7 @@
 import { RequestOptions } from '../common/http-request';
 
 import { AmazonPayShippingInitializeOptions } from './strategies/amazon';
+import { AmazonPayv2ShippingInitializeOptions } from './strategies/amazonv2';
 
 /**
  * A set of options for configuring any requests related to the shipping step of
@@ -31,4 +32,9 @@ export interface ShippingInitializeOptions<T = {}> extends ShippingRequestOption
      * when using Amazon Pay.
      */
     amazon?: AmazonPayShippingInitializeOptions;
+    /**
+     * The options that are required to initialize the edit button and shipping step
+     * when using Amazon Pay v2.
+     */
+    amazonpay?: AmazonPayv2ShippingInitializeOptions;
 }

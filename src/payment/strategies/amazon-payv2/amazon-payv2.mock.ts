@@ -7,6 +7,7 @@ export function getAmazonPayv2SDKMock(): AmazonPayv2SDK {
         Pay: {
             renderButton: jest.fn(),
             bindChangeAction: jest.fn(),
+            signout: jest.fn(),
         },
     };
 }
