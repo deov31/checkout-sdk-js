@@ -10,7 +10,8 @@ export interface AmazonPayv2SDK {
 
 export interface AmazonPayv2Client {
     renderButton(containerId: string, params: AmazonPayv2ButtonParams): HTMLElement;
-    bindChangeAction(): void;
+    bindChangeAction(buttonId: string, options: AmazonPayv2ChangeActionOptions): void;
+    signout(): void;
 }
 
 export interface AmazonPayv2HostWindow extends Window {
@@ -32,6 +33,13 @@ export interface AmazonPayv2CheckoutSession {
     method?: string;
     extractAmazonCheckoutSessionId?: string;
 }
+
+export interface AmazonPayv2ChangeActionOptions {
+    amazonCheckoutSessionId: string;
+    changeAction: string;
+}
+
+export type EditableAddressType = 'billing' | 'shipping' | 'method';
 
 export enum AmazonPayv2Regions {
     de = 'eu',
@@ -63,4 +71,9 @@ export enum AmazonPayv2LedgerCurrency {
     jp = 'JPY',
     uk = 'GBP',
     us = 'USD',
+}
+
+export enum AmazonPayv2PayOptions {
+    PayAndShip = 'PayAndShip',
+    PayOnly = 'PayOnly',
 }
