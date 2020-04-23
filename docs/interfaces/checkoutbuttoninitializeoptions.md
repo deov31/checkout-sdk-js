@@ -15,6 +15,7 @@
 
 ### Properties
 
+* [amazonpay](checkoutbuttoninitializeoptions.md#amazonpay)
 * [braintreepaypal](checkoutbuttoninitializeoptions.md#braintreepaypal)
 * [braintreepaypalcredit](checkoutbuttoninitializeoptions.md#braintreepaypalcredit)
 * [containerId](checkoutbuttoninitializeoptions.md#containerid)
@@ -30,6 +31,15 @@
 
 ## Properties
 
+<a id="amazonpay"></a>
+
+### `<Optional>` amazonpay
+
+**● amazonpay**: *[AmazonPayV2ButtonInitializeOptions](amazonpayv2buttoninitializeoptions.md)*
+
+The options that are required to facilitate Amazon Pay v2. They can be omitted unless you need to support Amazon Pay v2.
+
+___
 <a id="braintreepaypal"></a>
 
 ### `<Optional>` braintreepaypal

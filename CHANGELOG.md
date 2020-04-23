@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.60.1-alpha.65ad12c48a074e3e0db908d49ff04505ff0ff1b2](https://github.com/bigcommerce/checkout-sdk-js/compare/v1.60.0...v1.60.1-alpha.65ad12c48a074e3e0db908d49ff04505ff0ff1b2) (2020-04-23)
+
+
+### Code Refactoring
+
+* **payment:** INT-2464 rename the method id from amazonmaxo to amazonpay ([628bf50](https://github.com/bigcommerce/checkout-sdk-js/commit/628bf50))
+* **payment:** INT-2464 rename to amazon pay v2 ([994bd02](https://github.com/bigcommerce/checkout-sdk-js/commit/994bd02))
+
+
+### Features
+
+* **payment:** INT-2113 Checkout button and customer strategy ([b1318b8](https://github.com/bigcommerce/checkout-sdk-js/commit/b1318b8))
+
 ## [1.60.0](https://github.com/bigcommerce/checkout-sdk-js/compare/v1.59.0...v1.60.0) (2020-04-16)
 
 
