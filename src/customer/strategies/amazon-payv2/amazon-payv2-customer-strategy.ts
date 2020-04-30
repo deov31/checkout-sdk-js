@@ -9,6 +9,7 @@ import { CustomerInitializeOptions, CustomerRequestOptions } from '../../custome
 import CustomerStrategyActionCreator from '../../customer-strategy-action-creator';
 import CustomerStrategy from '../customer-strategy';
 
+
 export default class AmazonPayv2CustomerStrategy implements CustomerStrategy {
     private _walletButton?: HTMLElement;
 
@@ -17,11 +18,12 @@ export default class AmazonPayv2CustomerStrategy implements CustomerStrategy {
         private _remoteCheckoutActionCreator: RemoteCheckoutActionCreator,
         private _amazonPayv2PaymentProcessor: AmazonPayv2PaymentProcessor,
         private _customerStrategyActionCreator: CustomerStrategyActionCreator,
-        private _formPoster: FormPoster
+        private _formPoster: FormPoster,
     ) {}
 
     async initialize(options: CustomerInitializeOptions): Promise<InternalCheckoutSelectors> {
         const { methodId, amazonpay } = options;
+
         if (!amazonpay) {
             throw new InvalidArgumentError('Unable to proceed because "options.amazonpay" argument is not provided.');
         }
