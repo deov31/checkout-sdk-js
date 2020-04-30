@@ -39,7 +39,7 @@ export interface AmazonPayv2ChangeActionOptions {
     changeAction: string;
 }
 
-export type EditableAddressType = 'billing' | 'shipping' | 'method';
+export type EditableAddressType = 'billing' | 'shipping' | 'method' | 'meow';
 
 export enum AmazonPayv2Regions {
     de = 'eu',

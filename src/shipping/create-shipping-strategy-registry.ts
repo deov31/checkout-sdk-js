@@ -5,13 +5,17 @@ import { CheckoutRequestSender, CheckoutStore } from '../checkout';
 import { Registry } from '../common/registry';
 import { PaymentMethodActionCreator, PaymentMethodRequestSender } from '../payment';
 import { AmazonPayScriptLoader } from '../payment/strategies/amazon-pay';
+import { createAmazonPayv2PaymentProcessor } from '../payment/strategies/amazon-payv2';
 import { RemoteCheckoutActionCreator, RemoteCheckoutRequestSender } from '../remote-checkout';
 
 import ConsignmentActionCreator from './consignment-action-creator';
 import ConsignmentRequestSender from './consignment-request-sender';
 import { ShippingStrategy } from './strategies';
 import { AmazonPayShippingStrategy } from './strategies/amazon';
+import { AmazonPayv2ShippingStrategy } from './strategies/amazonv2';
 import { DefaultShippingStrategy } from './strategies/default';
+
+//import PaymentStrategyActionCreator from '../payment';
 
 export default function createShippingStrategyRegistry(
     store: CheckoutStore,
@@ -31,6 +35,18 @@ export default function createShippingStrategyRegistry(
             new AmazonPayScriptLoader(getScriptLoader())
         )
     );
+
+    registry.register('amazonpay', () =>
+        new AmazonPayv2ShippingStrategy(
+            store,
+            //consignmentActionCreator,
+            //new PaymentStrategyActionCreator(registry, undefined, undefined),
+            new PaymentMethodActionCreator(new PaymentMethodRequestSender(requestSender)),
+            //new RemoteCheckoutActionCreator(new RemoteCheckoutRequestSender(requestSender)),
+            //new AmazonPayScriptLoader(getScriptLoader())
+            createAmazonPayv2PaymentProcessor(store)
+        )
+    );    
 
     registry.register('default', () =>
         new DefaultShippingStrategy(
