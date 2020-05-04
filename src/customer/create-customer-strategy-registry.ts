@@ -59,7 +59,8 @@ export default function createCustomerStrategyRegistry(
             remoteCheckoutActionCreator,
             createAmazonPayv2PaymentProcessor(store),
             new CustomerStrategyActionCreator(registry),
-            formPoster
+            formPoster,
+            //paymentMethodActionCreator
         )
     );
 

@@ -8,6 +8,9 @@ import { RemoteCheckoutActionCreator } from '../../../remote-checkout';
 import { CustomerInitializeOptions, CustomerRequestOptions } from '../../customer-request-options';
 import CustomerStrategyActionCreator from '../../customer-strategy-action-creator';
 import CustomerStrategy from '../customer-strategy';
+//import CustomerActionCreator from '../../customer-action-creator';
+//import PaymentMethodActionCreator from '../../payment-method-action-creator';
+
 
 export default class AmazonPayv2CustomerStrategy implements CustomerStrategy {
     private _walletButton?: HTMLElement;
@@ -17,11 +20,22 @@ export default class AmazonPayv2CustomerStrategy implements CustomerStrategy {
         private _remoteCheckoutActionCreator: RemoteCheckoutActionCreator,
         private _amazonPayv2PaymentProcessor: AmazonPayv2PaymentProcessor,
         private _customerStrategyActionCreator: CustomerStrategyActionCreator,
-        private _formPoster: FormPoster
+        private _formPoster: FormPoster,
+        //private _paymentActionCreator: PaymentActionCreator,
+        //private _paymentMethodActionCreator: PaymentMethodActionCreator,
     ) {}
 
     async initialize(options: CustomerInitializeOptions): Promise<InternalCheckoutSelectors> {
         const { methodId, amazonpay } = options;
+        //const state = await this._store.dispatch(this._paymentMethodActionCreator.loadPaymentMethod(methodId));
+        const state = this._store.getState();
+
+        if (methodId) {
+            const paymentMethod = state.paymentMethods.getPaymentMethod(methodId);
+
+            console.log(paymentMethod);
+        }
+
         if (!amazonpay) {
             throw new InvalidArgumentError('Unable to proceed because "options.amazonpay" argument is not provided.');
         }
@@ -141,4 +155,31 @@ export default class AmazonPayv2CustomerStrategy implements CustomerStrategy {
 
         return this._amazonPayv2PaymentProcessor.createButton(`#${containerId}`, amazonButtonOptions);
     }
+
+    // private _bindEditButton(type: EditableAddressType, sessionId: string): void {
+    //     const id = `#edit-${type}-address-button`;
+    //     const button = document.querySelector(id);
+
+    //     if (!button) {
+    //         return;
+    //     }
+
+    //     const clone = button.cloneNode(true);
+    //     button.replaceWith(clone);
+
+    //     clone.addEventListener('click', () => this._showLoadingSpinner(() => new Promise(noop)));
+
+    //     this._amazonPayv2PaymentProcessor.bindButton(id, sessionId);
+    // }
+
+    // private _showLoadingSpinner(callback?: () => Promise<void> | Promise<never>): Promise<InternalCheckoutSelectors> {
+    //     return this._store.dispatch(this._paymentStrategyActionCreator.widgetInteraction(() => {
+
+    //         if (callback) {
+    //             return callback();
+    //         }
+
+    //         return Promise.reject();
+    //     }), { queueId: 'widgetInteraction' });
+    // }
 }
