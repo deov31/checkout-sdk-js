@@ -6,6 +6,7 @@ import { InvalidArgumentError, MissingDataError, MissingDataErrorType, RequestEr
 import { OrderActionCreator, OrderRequestBody } from '../../../order';
 import { OrderFinalizationNotRequiredError } from '../../../order/errors';
 import { AmazonPayv2PaymentProcessor, AmazonPayv2PayOptions, AmazonPayv2Placement } from '../../../payment/strategies/amazon-payv2';
+import { PaymentArgumentInvalidError } from '../../errors';
 import PaymentActionCreator from '../../payment-action-creator';
 import PaymentMethodActionCreator from '../../payment-method-action-creator';
 import { PaymentInitializeOptions, PaymentRequestOptions } from '../../payment-request-options';
@@ -83,16 +84,18 @@ export default class AmazonPayv2PaymentStrategy implements PaymentStrategy {
         const { paymentToken } = paymentMethod.initializationData;
 
         if (paymentToken) {
-            const { ...order } = payload;
-            const paymentPayload = {
-                methodId: this._methodId,
-                paymentData: { nonce: paymentToken },
-            };
+            const {payment,  ...order } = payload;
+            const paymentData =  { nonce: paymentToken };
+
+            if (!payment) {
+                throw new PaymentArgumentInvalidError(['payment']);
+            }
 
             try {
                 await this._store.dispatch(this._orderActionCreator.submitOrder(order, options));
-                return this._store.dispatch(this._paymentActionCreator.submitPayment(paymentPayload));
-                
+
+                return this._store.dispatch(this._paymentActionCreator.submitPayment({...payment, paymentData}));
+
             } catch (error) {
                 if (!(error instanceof RequestError) || !some(error.body.errors, { code: 'three_d_secure_required' })) {
                     return Promise.reject(error);
