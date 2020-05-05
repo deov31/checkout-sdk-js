@@ -23,6 +23,52 @@ declare interface AddressRequestBody {
     }>;
 }
 
+declare interface AmazonPayV2ButtonInitializeOptions {
+    containerId: string;
+    options: AmazonPayv2ButtonParams;
+}
+
+declare interface AmazonPayv2ButtonParams {
+    merchantId: string;
+    createCheckoutSession: AmazonPayv2CheckoutSession;
+    placement: AmazonPayv2Placement;
+    ledgerCurrency: AmazonPayv2LedgerCurrency;
+    productType?: string;
+    checkoutLanguage?: AmazonPayv2CheckoutLanguage;
+    sandbox?: boolean;
+}
+
+declare enum AmazonPayv2CheckoutLanguage {
+    es_ES = "es_ES",
+    en_GB = "en_GB",
+    en_US = "en_US",
+    de_DE = "de_DE",
+    fr_FR = "fr_FR",
+    it_IT = "it_IT",
+    ja_JP = "ja_JP"
+}
+
+declare interface AmazonPayv2CheckoutSession {
+    url: string;
+    method?: string;
+    extractAmazonCheckoutSessionId?: string;
+}
+
+declare enum AmazonPayv2LedgerCurrency {
+    eu = "EUR",
+    jp = "JPY",
+    uk = "GBP",
+    us = "USD"
+}
+
+declare enum AmazonPayv2Placement {
+    Home = "Home",
+    Product = "Product",
+    Cart = "Cart",
+    Checkout = "Checkout",
+    Other = "Other"
+}
+
 declare interface BraintreeError extends Error {
     type: 'CUSTOMER' | 'MERCHANT' | 'NETWORK' | 'INTERNAL' | 'UNKNOWN';
     code: string;
@@ -76,6 +122,11 @@ declare class CheckoutButtonErrorSelector {
 }
 
 declare interface CheckoutButtonInitializeOptions extends CheckoutButtonOptions {
+    /**
+     * The options that are required to facilitate Amazon Pay v2. They can be
+     * omitted unless you need to support Amazon Pay v2.
+     */
+    amazonpay?: AmazonPayV2ButtonInitializeOptions;
     /**
      * The options that are required to facilitate Braintree PayPal. They can be
      * omitted unless you need to support Braintree PayPal.
@@ -202,6 +253,7 @@ declare interface CheckoutButtonInitializerOptions {
 }
 
 declare enum CheckoutButtonMethodType {
+    AMAZON_PAY_V2 = "amazonpay",
     BRAINTREE_PAYPAL = "braintreepaypal",
     BRAINTREE_PAYPAL_CREDIT = "braintreepaypalcredit",
     GOOGLEPAY_AUTHORIZENET = "googlepayauthorizenet",
