@@ -85,7 +85,7 @@ export default class AmazonPayv2PaymentStrategy implements PaymentStrategy {
 
         if (paymentToken) {
             const { payment, ...order } = payload;
-            const paymentData = payment && payment.paymentData;
+            const paymentData = payment && payment.paymentData && {nonce:paymentToken};
 
             if (!payment) {
                 throw new PaymentArgumentInvalidError(['payment']);
