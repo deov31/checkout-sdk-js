@@ -1,5 +1,5 @@
 import { createClient as createPaymentClient } from '@bigcommerce/bigpay-client';
-import { createAction, Action, createErrorAction } from '@bigcommerce/data-store';
+import { createAction, createErrorAction, Action } from '@bigcommerce/data-store';
 import { createRequestSender, RequestSender } from '@bigcommerce/request-sender';
 import { createScriptLoader, ScriptLoader } from '@bigcommerce/script-loader';
 import { of, Observable } from 'rxjs';
@@ -26,8 +26,8 @@ import { PaymentActionType } from '../../payment-actions';
 import PaymentMethodRequestSender from '../../payment-method-request-sender';
 import { PaymentInitializeOptions } from '../../payment-request-options';
 import PaymentRequestTransformer from '../../payment-request-transformer';
-import PaymentStrategy from '../payment-strategy';
 import { getErrorPaymentResponseBody } from '../../payments.mock';
+import PaymentStrategy from '../payment-strategy';
 
 import { Zip } from './zip';
 import ZipPaymentStrategy from './zip-payment-strategy';
@@ -338,7 +338,7 @@ describe('ZipPaymentStrategy', () => {
                 } ,
             }));
             window.location.replace = jest.fn();
-  
+
             jest.spyOn(paymentActionCreator, 'submitPayment')
                 .mockReturnValue(of(createErrorAction(PaymentActionType.SubmitPaymentFailed, error)));
 

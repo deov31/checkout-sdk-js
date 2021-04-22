@@ -77,7 +77,7 @@ export default class ZipPaymentStrategy implements PaymentStrategy {
 
         if (this._redirectFlowIsTrue()) {
             const nonce = JSON.parse(this._paymentMethod.clientToken);
-            await this._prepareForReferredRegistration(payment.methodId, nonce.id);  
+            await this._prepareForReferredRegistration(payment.methodId, nonce.id);
             try {
                 return await this._store.dispatch(this._paymentActionCreator.submitPayment({methodId: payment.methodId, paymentData: { nonce: nonce.id }}));
             } catch (error) {
