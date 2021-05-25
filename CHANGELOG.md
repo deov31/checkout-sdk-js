@@ -2,6 +2,65 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.151.1-alpha.2211956242c86e407a4bc92ae31411a4623476b1](https://github.com/bigcommerce/checkout-sdk-js/compare/v1.134.1...v1.151.1-alpha.2211956242c86e407a4bc92ae31411a4623476b1) (2021-05-25)
+
+
+### Features
+
+* **cart:** CHECKOUT-5747 Add cart changed error meta ([7addf66](https://github.com/bigcommerce/checkout-sdk-js/commit/7addf660dd7e82046a60b121c7a7a8e10b1d7a17))
+* **checkout:** PAYPAL-1024 make APM work regardless of shopper geolocation ([73cad65](https://github.com/bigcommerce/checkout-sdk-js/commit/73cad654ec91e93a7eb48720e6c329330a1d6e10))
+* **payment:** INT-2503 Add strategy for checkout.com with Fawry ([878ebd7](https://github.com/bigcommerce/checkout-sdk-js/commit/878ebd70c588e5920414d2637c1db09f202d7146))
+* **payment:** INT-3702 added vaulted cc ([cdf639c](https://github.com/bigcommerce/checkout-sdk-js/commit/cdf639c658ff489b03eef03d137266486e0cc50d))
+* **payment:** INT-3702 added vaulted cc ([8f6f2a1](https://github.com/bigcommerce/checkout-sdk-js/commit/8f6f2a1cef716386de329c5d052d570b43019ff6))
+* **payment:** INT-3702 fix containerId ([7d6bc75](https://github.com/bigcommerce/checkout-sdk-js/commit/7d6bc754f93516357a5f3a6d03051f1a28638033))
+* **payment:** INT-3905 creating execute for digital river and credit card ([2937cdd](https://github.com/bigcommerce/checkout-sdk-js/commit/2937cddde9a12ca4f6c1daecd6ade5047680ee6b))
+* **payment:** INT-3931 Add strategy for checkout.com with SEPA ([5538a3b](https://github.com/bigcommerce/checkout-sdk-js/commit/5538a3b80f13ff653142bcd598553195168834b1))
+* **payment:** INT-3947 Suppress PayPal and Klarna ([5fd75a0](https://github.com/bigcommerce/checkout-sdk-js/commit/5fd75a054169b12f677831b98a444a7fa8cb5165))
+* **payment:** INT-4021 Add strategy for iDeal APM ([752796b](https://github.com/bigcommerce/checkout-sdk-js/commit/752796bb109acadd118d94f51d04a3cc8cd1deb5))
+* **payment:** INT-4021 Test Cleanup ([61dfc25](https://github.com/bigcommerce/checkout-sdk-js/commit/61dfc257e6dbfb4b66661890403a96097a5f0f30))
+* **payment:** INT-4071 Clearpay - Create custom strategy ([ff7ea13](https://github.com/bigcommerce/checkout-sdk-js/commit/ff7ea134df8703a5e8fc011554902314a5fcb8a8))
+* **payment:** INT-4071 Clearpay - rename function that validate the countrycode ([e44941f](https://github.com/bigcommerce/checkout-sdk-js/commit/e44941f60a471bb7cdd49407aee761354b4feafb))
+* **payment:** INT-4071 validate countryCode in billingAddress ([3f7993d](https://github.com/bigcommerce/checkout-sdk-js/commit/3f7993d0efe33e2b31e28a67d810c45646d7b8dc))
+* **payment:** INT-4071 wip ([4520461](https://github.com/bigcommerce/checkout-sdk-js/commit/4520461aecf269ba6cf497f2423dd3ba48eedb9a))
+* **payment:** INT-4117 Support reload DR widget ([beb388a](https://github.com/bigcommerce/checkout-sdk-js/commit/beb388a233d64ee3532cf28ec4e33bd44095837f))
+* **payment:** INT-4117 Support reload DR widget + capsula changes ([bcfd2eb](https://github.com/bigcommerce/checkout-sdk-js/commit/bcfd2eb2b4a48220aafa1ffb3e1ef55f5b3e32d8))
+* **payment:** INT-4150 changing zip strategy flow ([fd2354a](https://github.com/bigcommerce/checkout-sdk-js/commit/fd2354ad5d9c2a8ebe3a7a87bf12723644bec248))
+* **payment:** INT-4197 added test ([453974f](https://github.com/bigcommerce/checkout-sdk-js/commit/453974f555a90e21d7ab67dd5f021386a2e12821))
+* **payment:** INT-4197 added type and color parameters on googlepay checkout button ([34a5cec](https://github.com/bigcommerce/checkout-sdk-js/commit/34a5cec2bf4a90940a3bc5d31b29f9657e126e4c))
+* **payment:** INT-4237 Add issuer for Mollie APMs ([21bfded](https://github.com/bigcommerce/checkout-sdk-js/commit/21bfded889dba0afb22396d439910116934cebe4))
+* **payment:** INT-4242 Add Quadpay payment strategy ([2cdeb9a](https://github.com/bigcommerce/checkout-sdk-js/commit/2cdeb9ac8047e497bae78119e22f949bc8f8576d))
+* **payment:** INT-4242 Create StorefrontPaymentRequestSender ([2211956](https://github.com/bigcommerce/checkout-sdk-js/commit/2211956242c86e407a4bc92ae31411a4623476b1))
+* **payment:** INT-4258 StripeV3: Improve error handling ([48da4f4](https://github.com/bigcommerce/checkout-sdk-js/commit/48da4f4b51cd9d34c9f7cefa04de2ddde02bf714))
+* **payment:** PAYMENTS-6806 add dummy PPSDK strategy ([#1128](https://github.com/bigcommerce/checkout-sdk-js/issues/1128)) ([547a1c3](https://github.com/bigcommerce/checkout-sdk-js/commit/547a1c3d263479499b8b42b9a8858dd28903c3a3))
+* **payment:** PAYMENTS-6813 extend Payment Method type to cover PPSDK variants ([#1139](https://github.com/bigcommerce/checkout-sdk-js/issues/1139)) ([0be6fcf](https://github.com/bigcommerce/checkout-sdk-js/commit/0be6fcf897f0190baa4373366d906135e81088d0))
+* **payment:** PAYPAL-976 Paypal APM fields intagration was added ([b5266cf](https://github.com/bigcommerce/checkout-sdk-js/commit/b5266cf073a1f896d8a4844ad5607eb1799d2579))
+* **payment:** PAYPAL-982 Pass BN code into the banners script ([8a71bfb](https://github.com/bigcommerce/checkout-sdk-js/commit/8a71bfba5a54bc91ed3501a34705fc1778ca4e91))
+
+
+### Bug Fixes
+
+* **checkout:** INT-3571 Google Pay [StripeV3] - Billing address is missing ([df60da3](https://github.com/bigcommerce/checkout-sdk-js/commit/df60da31414942acb3d8f81941d7327898c4d442))
+* **checkout:** INT-3941 Updated remote-checkout path on button initialization ([226232f](https://github.com/bigcommerce/checkout-sdk-js/commit/226232f9f0f3c5e47da31c4da17419d434eb74da))
+* **payment:** CHECKOUT-5740 Post to and receive messages from www subdomain ([2e80137](https://github.com/bigcommerce/checkout-sdk-js/commit/2e801378f0c1b845e1b77f3394ec0d0f72a475d8))
+* **payment:** INT-3408 added masterpass SRC experiment ([933609a](https://github.com/bigcommerce/checkout-sdk-js/commit/933609ae27a938bfb3b9e3e976f5f9014d650731))
+* **payment:** INT-3408 refactor script loader ([f064474](https://github.com/bigcommerce/checkout-sdk-js/commit/f064474710c2dfc09f4a075a5f060874f31e843b))
+* **payment:** INT-3611 Refresh the state in Googlepay and Braintree refactor ([a33dc55](https://github.com/bigcommerce/checkout-sdk-js/commit/a33dc5539861f809eff2763a2d89cbb5d56192e9))
+* **payment:** INT-4063 Avoid holding inventory if a payment intent confirmation fails for StripeV3 ([e291784](https://github.com/bigcommerce/checkout-sdk-js/commit/e291784ab81c98001e865e1e07836bf927ff6a45))
+* **payment:** INT-4266 Googlepay - fixing where nonce value is going to be reloaded ([399b670](https://github.com/bigcommerce/checkout-sdk-js/commit/399b670709893f69ae2d3f10e57b3aee6346feab))
+* **payment:** PAYMENTS-6642 Make Paypal overlay modal/new window aware ([#1088](https://github.com/bigcommerce/checkout-sdk-js/issues/1088)) ([326c961](https://github.com/bigcommerce/checkout-sdk-js/commit/326c9611b0a80c9c49d4278f4a240e23f7c18bdb))
+* **payment:** PAYPAL-965 Check that there are no inventory underselling or overselling issues in PayPal Commerce ([a0f4952](https://github.com/bigcommerce/checkout-sdk-js/commit/a0f49522c39d9d615904eac3a65174b3a64f9dc6))
+* **payment:** PAYPAL-970 add unit test for click handler on paypal checkout ([503e60b](https://github.com/bigcommerce/checkout-sdk-js/commit/503e60be649fd0757f729477c2e07fa2c831db44))
+* **payment:** PAYPAL-970 added loader test ([113d2f2](https://github.com/bigcommerce/checkout-sdk-js/commit/113d2f2821c94e27914ea4af4be64c7cd11e7a7b))
+* **payment:** PAYPAL-970 don't show loading indicator if checkout form hasn't passed validation ([c571f90](https://github.com/bigcommerce/checkout-sdk-js/commit/c571f9009e2e9804da6d3f67ef11040e35938caf))
+* **payment:** PAYPAL-970 fix linter error ([75b914f](https://github.com/bigcommerce/checkout-sdk-js/commit/75b914fb7eebaabd36fb33ff7f3f04a9d9ba6e4b))
+* **payment:** PAYPAL-970 small fixes after code review ([083e2c5](https://github.com/bigcommerce/checkout-sdk-js/commit/083e2c5419c5d2ec13e5e85aa6329e71720c01f2))
+* **payment:** PAYPAL-983 Improve the Checkout SDK documentation around PayPal Commerce ([613c456](https://github.com/bigcommerce/checkout-sdk-js/commit/613c4566dd787c58d4b4f649027f5b6cddf03a91))
+
+
+### Code Refactoring
+
+* **payment:** INT-4242 Quadpay code cleanup ([8675a9d](https://github.com/bigcommerce/checkout-sdk-js/commit/8675a9d8de5cac74f51e3180930c8b82dcbd4a16))
+
 ## [1.151.0](https://github.com/bigcommerce/checkout-sdk-js/compare/v1.150.0...v1.151.0) (2021-05-24)
 
 
